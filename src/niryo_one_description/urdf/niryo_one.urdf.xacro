@@ -1,0 +1,548 @@
+<?xml version="1.0"?>
+
+<!--
+    niryo_one.urdf.xacro
+    Copyright (C) 2019 Niryo
+    All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="niryo_one">
+  <!-- Arguments -->
+  <xacro:arg name="standalone" default="true" />
+  <xacro:arg name="parent_link" default="world" />
+  <xacro:arg name="pose_x" default="0.0" />
+  <xacro:arg name="pose_y" default="0.0" />
+  <xacro:arg name="pose_z" default="0.0" />
+  <xacro:arg name="rotation_z" default="0.0" />
+
+	<!-- Properties -->
+  <xacro:property name="com_mainsupport_x" value="-0.00216" />
+  <xacro:property name="com_mainsupport_z" value="0.02135" />
+  <xacro:property name="com_mainsupport_y" value="-0.00204" />
+  <xacro:property name="com_left_gear_x" value="0.00326" />
+  <xacro:property name="com_left_gear_y" value="0.00988" />
+  <xacro:property name="com_left_gear_z" value="0.00032" />
+  <xacro:property name="com_right_gear_x" value="0.00374" />
+  <xacro:property name="com_right_gear_y" value="0.01129" />
+  <xacro:property name="com_rod_y" value="0.0147" />
+  <xacro:property name="com_clamp_x" value="0.00896" />
+  <xacro:property name="com_clamp_y" value="0.03059" />
+  <xacro:property name="com_motor_x" value="-0.00684" />
+  <xacro:property name="com_motor_z" value="0.0115" />
+
+  <xacro:property name="distance_origin_shoulder_z" value="0.103" />
+  <xacro:property name="distance_shoulder_arm_z" value="0.080" />
+  <xacro:property name="distance_arm_elbow_x" value="0.210" />
+  <xacro:property name="distance_elbow_forearm_x" value="0.0415" />
+  <xacro:property name="distance_elbow_forearm_y" value="0.030" />
+  <xacro:property name="distance_forearm_wrist_z" value="0.180" />
+  <xacro:property name="distance_wrist_hand_x" value="0.0164" />
+  <xacro:property name="distance_wrist_hand_y" value="-0.0055" />
+  <xacro:property name="distance_hand_tool" value="0.0073" />
+  <xacro:property name="distance_mainsupport_left_gear_x" value="-0.010" />
+  <xacro:property name="distance_mainsupport_left_gear_z" value="0.0246" />
+  <xacro:property name="distance_mainsupport_left_gear_y" value="-0.01225" />
+  <xacro:property name="distance_mainsupport_right_gear_x" value="0.010" />
+  <xacro:property name="distance_mainsupport_right_gear_z" value="0.0246" />
+  <xacro:property name="distance_mainsupport_right_gear_y" value="-0.01225" />
+  <xacro:property name="distance_mainsupport_rod_x" value="-0.0065" />
+  <xacro:property name="distance_mainsupport_rod_z" value="0.0466" />
+  <xacro:property name="distance_mainsupport_rod_y" value="-0.01225" />
+  <xacro:property name="distance_mainsupport_motor_x" value="-0.010" />
+  <xacro:property name="distance_mainsupport_motor_z" value="0.0246" />
+  <xacro:property name="distance_mainsupport_motor_y" value="-0.00425" />
+  <xacro:property name="distance_gear_clamp_x" value="0.00658" />
+  <xacro:property name="distance_gear_clamp_y" value="0.03438" />
+  <xacro:property name="distance_rod_clamp_y" value="0.02940" />
+
+	<xacro:property name="PI" value="3.14159265359" />
+
+  <xacro:property name="limit_low_shoulder_rotation" value="-3.05433" />
+  <xacro:property name="limit_up_shoulder_rotation" value="3.05433" />
+  <xacro:property name="limit_low_arm_rotation" value="-1.91986" />
+  <xacro:property name="limit_up_arm_rotation" value="0.640187" />
+  <xacro:property name="limit_low_elbow_rotation" value="-1.397485" />
+  <xacro:property name="limit_up_elbow_rotation" value="${PI/2}" />
+  <xacro:property name="limit_low_forearm_rotation" value="-3.05433" />
+  <xacro:property name="limit_up_forearm_rotation" value="3.05433" />
+  <xacro:property name="limit_low_wrist_rotation" value="-1.74533" />
+  <xacro:property name="limit_up_wrist_rotation" value="1.91986" />
+  <xacro:property name="limit_low_hand_rotation" value="-2.57436" />
+  <xacro:property name="limit_up_hand_rotation" value="2.57436" />
+  <xacro:property name="limit_low_hand_rotation" value="-2.57436" />
+  <xacro:property name="limit_up_hand_rotation" value="2.57436" />
+  <xacro:property name="limit_low_gear_rotation" value="0" />
+  <xacro:property name="limit_up_gear_rotation" value="1.2" />
+  <xacro:property name="limit_low_rod_rotation" value="${-PI}" />
+  <xacro:property name="limit_up_rod_rotation" value="${PI}" />
+  <xacro:property name="limit_low_clamp_rotation" value="${-PI}" />
+  <xacro:property name="limit_up_clamp_rotation" value="${PI}" />
+
+  <!-- Includes -->
+	<xacro:include filename="$(find niryo_one_description)/urdf/niryo_one_gazebo.urdf.xacro"/>
+	<xacro:include filename="$(find niryo_one_description)/urdf/niryo_one_transmission.urdf.xacro"/>
+
+	<!-- Links -->
+    <xacro:if value="$(arg standalone)">
+      <link name="world" />
+    </xacro:if>
+	
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/collada/base_link.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/base_link.stl" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 ${distance_origin_shoulder_z / 2}" rpy="0 0 0" />
+            <mass value="1.2" />
+            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015"/>
+        </inertial>
+    </link>
+
+    <link name="shoulder_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/collada/shoulder_link.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/shoulder_link.stl" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 ${distance_shoulder_arm_z / 2}" rpy="0 0 0" />
+            <mass value="0.8" />
+            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015"/>
+        </inertial>
+    </link>
+
+    <link name="arm_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/collada/arm_link.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/arm_link.stl" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="${distance_arm_elbow_x / 2} 0.006 0.003" rpy="0 0 0" />
+            <mass value="0.4" />
+            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015"/>
+        </inertial>
+    </link>
+
+    <link name="elbow_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/collada/elbow_link.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/elbow_link.stl" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="${distance_elbow_forearm_x / 2} ${distance_elbow_forearm_y / 2} 0" rpy="0 0 0" />
+            <mass value="0.3" />
+            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015"/>
+        </inertial>
+    </link>
+
+    <link name="forearm_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/collada/forearm_link.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/forearm_link.stl" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 ${distance_forearm_wrist_z / 2}" rpy="0 0 0" />
+            <mass value="0.3" />
+            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015"/>
+        </inertial>
+    </link>
+
+    <link name="wrist_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/collada/wrist_link.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/wrist_link.stl" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="${distance_wrist_hand_x / 2} ${distance_wrist_hand_y / 2} 0" rpy="0 0 0" />
+            <mass value="0.15" />
+            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+        </inertial>
+    </link>
+
+    <link name="hand_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/collada/hand_link.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/hand_link.stl" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 ${distance_hand_tool / 2}" rpy="0 0 0" />
+            <mass value="0.05" />
+            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+        </inertial>
+    </link>
+	
+    <link name="mainsupport">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_MainSupport.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_MainSupport.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="${com_mainsupport_x} ${com_mainsupport_y} ${com_mainsupport_z}" rpy="0 0 0" />
+            <mass value="0.01306" />
+			<!--<inertia ixx="4.94888021667e-06" ixy="0.0" ixz="0.0" iyy="4.27188246667e-06" iyz="0.0" izz="5.00673601667e-06"/>-->
+			<inertia ixx="4.94888021667e-03" ixy="0.0" ixz="0.0" iyy="4.27188246667e-03" iyz="0.0" izz="5.00673601667e-03"/>
+        </inertial>
+    </link>
+
+    <link name="motor">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_Motor.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_Motor.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="${com_motor_x} 0 ${com_motor_z}" rpy="0 0 0" />
+            <mass value="0.01658" />
+			<!--<inertia ixx="1.803075e-06" ixy="0.0" ixz="0.0" iyy="2.797875e-06" iyz="0.0" izz="2.58648e-06"/>-->
+			<inertia ixx="1.803075e-03" ixy="0.0" ixz="0.0" iyy="2.797875e-03" iyz="0.0" izz="2.58648e-03"/>
+        </inertial>
+    </link>
+
+    <link name="left_gear">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_GearLeft.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_GearLeft.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="${com_left_gear_x} ${com_left_gear_y} ${com_left_gear_z}" rpy="0 0 0" />
+            <mass value="0.0043" />
+			<!--<inertia ixx="9.39126584733e-07" ixy="0.0" ixz="0.0" iyy="2.218355466e-07" iyz="0.0" izz="1.06535700633e-06"/>-->
+			<inertia ixx="9.39126584733e-04" ixy="0.0" ixz="0.0" iyy="2.218355466e-04" iyz="0.0" izz="1.06535700633e-03"/>
+        </inertial>
+    </link>
+
+    <link name="right_gear">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_GearRight.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_GearRight.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="${com_right_gear_x} ${com_right_gear_y} 0" rpy="0 0 0" />
+            <mass value="0.00375" />
+            <!--<inertia ixx="7.95137005e-07" ixy="0.0" ixz="0.0" iyy="1.7221403125e-07" iyz="0.0" izz="9.2735103625e-07"/>-->
+			<inertia ixx="7.95137005e-04" ixy="0.0" ixz="0.0" iyy="1.7221403125e-04" iyz="0.0" izz="9.2735103625e-04"/>
+        </inertial>
+    </link>
+
+    <link name="left_rod">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_Rod.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_Rod.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 ${com_rod_y} 0" rpy="0 0 0" />
+            <mass value="0.00214" />
+			<!--<inertia ixx="243.37e-9" ixy="-0.01e-9" ixz="0.0" iyy="76.17e-9" iyz="0.0" izz="198.23e-9"/>-->
+			<inertia ixx="243.37e-6" ixy="-0.01e-6" ixz="0.0" iyy="76.17e-6" iyz="0.0" izz="198.23e-6"/>
+		</inertial>
+    </link>
+
+    <link name="right_rod">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_Rod.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_Rod.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 ${com_rod_y} 0" rpy="0 0 0" />
+            <mass value="0.00214" />
+			<!--<inertia ixx="243.37e-9" ixy="-0.01e-9" ixz="0.0" iyy="76.17e-9" iyz="0.0" izz="198.23e-9"/>-->
+			<inertia ixx="243.37e-6" ixy="-0.01e-6" ixz="0.0" iyy="76.17e-6" iyz="0.0" izz="198.23e-6"/>
+		</inertial>
+    </link>
+
+    <link name="left_clamp">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_Clamp.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_Clamp.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="${com_clamp_x} ${com_clamp_y} 0" rpy="0 0 0" />
+            <mass value="0.00662" />
+			<!--<inertia ixx="1953.77e-9" ixy="447.97e-9" ixz="0.0" iyy="339.54e-9" iyz="0.0" izz="2024.22e-9"/>-->
+			<inertia ixx="1953.77e-6" ixy="447.97e-6" ixz="0.0" iyy="339.54e-6" iyz="0.0" izz="2024.22e-6"/>
+		</inertial>
+    </link>
+
+    <link name="right_clamp">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_Clamp.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://niryo_one_description/meshes/stl/G2_Clamp.STL" scale="0.001 0.001 0.001" />
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="${com_clamp_x} ${com_clamp_y} 0" rpy="0 0 0" />
+            <mass value="0.00662" />
+			<!--<inertia ixx="1953.77e-9" ixy="447.97e-9" ixz="0.0" iyy="339.54e-9" iyz="0.0" izz="2024.22e-9"/>-->
+			<inertia ixx="1953.77e-6" ixy="447.97e-6" ixz="0.0" iyy="339.54e-6" iyz="0.0" izz="2024.22e-6"/>
+		</inertial>
+    </link>
+
+    <link name="tool_link">
+    </link>
+
+    <!--Joints -->
+    <joint name="joint_base" type="fixed">
+        <parent link="$(arg parent_link)"/>
+        <child link="base_link"/>
+        <origin xyz="$(arg pose_x) $(arg pose_y) $(arg pose_z)" rpy="0 0 $(arg rotation_z)" />
+    </joint>
+
+    <joint name="joint_1" type="revolute">
+        <parent link="base_link" />
+        <child link="shoulder_link" />
+        <origin xyz="0 0 ${distance_origin_shoulder_z}" rpy="0 0 0" />
+        <axis xyz="0 0 1" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_shoulder_rotation}" upper="${limit_up_shoulder_rotation}" />
+        <dynamics damping="0.1" friction="0.0" />
+    </joint>
+
+    <joint name="joint_2" type="revolute">
+        <parent link="shoulder_link" />
+        <child link="arm_link" />
+        <origin xyz="0 0 ${distance_shoulder_arm_z}" rpy="${PI/2} ${-PI/2} 0" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_arm_rotation}" upper="${limit_up_arm_rotation}" />
+        <axis xyz="0 0 1" />
+        <dynamics damping="0.1" friction="0.0" />
+    </joint>
+
+    <joint name="joint_3" type="revolute">
+        <parent link="arm_link" />
+        <child link="elbow_link" />
+        <origin xyz="${distance_arm_elbow_x} 0 0" rpy="0 0 ${-PI/2}" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_elbow_rotation}" upper="${limit_up_elbow_rotation}" />
+        <axis xyz="0 0 1" />
+        <dynamics damping="0.1" friction="0.0" />
+    </joint>
+
+    <joint name="joint_4" type="revolute">
+        <parent link="elbow_link" />
+        <child link="forearm_link" />
+        <origin xyz="${distance_elbow_forearm_x} ${distance_elbow_forearm_y} 0" rpy="0 ${PI/2} 0" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_forearm_rotation}" upper="${limit_up_forearm_rotation}" />
+        <axis xyz="0 0 1" />
+        <dynamics damping="0.1" friction="0.0" />
+    </joint>
+
+    <joint name="joint_5" type="revolute">
+        <parent link="forearm_link" />
+        <child link="wrist_link" />
+        <origin xyz="0 0 ${distance_forearm_wrist_z}" rpy="0 ${-PI/2} 0" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_wrist_rotation}" upper="${limit_up_wrist_rotation}" />
+        <axis xyz="0 0 1" />
+        <dynamics damping="0.1" friction="0.0" />
+    </joint>
+
+    <joint name="joint_6" type="revolute">
+        <parent link="wrist_link" />
+        <child link="hand_link" />
+        <origin xyz="${distance_wrist_hand_x} ${distance_wrist_hand_y} 0" rpy="0 ${PI/2} 0" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_hand_rotation}" upper="${limit_up_hand_rotation}" />
+        <axis xyz="0 0 1" />
+        <dynamics damping="0.1" friction="0.0" />
+    </joint>
+
+    <joint name="tool_joint" type="fixed">
+        <parent link="hand_link" />
+        <child link="tool_link" />
+        <origin xyz="0 0 ${distance_hand_tool}" rpy="0 0 0" />
+    </joint>
+
+    <joint name="mainsupport_joint" type="fixed">
+        <parent link="tool_link" />
+        <child link="mainsupport" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+
+	<joint name="motor_joint" type="fixed">
+		<parent link="mainsupport" />
+		<child link="motor" />
+		<origin xyz="${distance_mainsupport_motor_x} ${distance_mainsupport_motor_y} ${distance_mainsupport_motor_z}" rpy="${-PI/2} ${PI} 0" />
+	</joint>
+
+    <joint name="gripper_joint" type="revolute">
+        <parent link="mainsupport" />
+        <child link="left_gear" />
+        <origin xyz="${distance_mainsupport_left_gear_x} ${distance_mainsupport_left_gear_y} ${distance_mainsupport_left_gear_z}" rpy="${-PI/2} ${PI/180*(180-72.65)} 0" />
+        <axis xyz="0 0 1" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_gear_rotation}" upper="${limit_up_gear_rotation}" />
+        <dynamics damping="0.1" friction="0.0" />
+    </joint>
+
+    <joint name="right_gear_joint" type="revolute">
+        <parent link="mainsupport" />
+        <child link="right_gear" />
+        <origin xyz="${distance_mainsupport_right_gear_x} ${distance_mainsupport_right_gear_y} ${distance_mainsupport_right_gear_z}" rpy="${PI/2} ${PI/180*(72.65)} 0" />
+        <axis xyz="0 0 1" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_gear_rotation}" upper="${limit_up_gear_rotation}" />
+        <dynamics damping="0.1" friction="0.0" />
+    	<mimic joint="gripper_joint" multiplier="1" offset="0" />
+    </joint>
+
+    <joint name="left_rod_joint" type="revolute">
+        <parent link="mainsupport" />
+        <child link="left_rod" />
+        <origin xyz="${distance_mainsupport_rod_x} ${distance_mainsupport_rod_y} ${distance_mainsupport_rod_z}" rpy="${-PI/2} ${PI/2} 0" />
+        <axis xyz="0 0 1" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_rod_rotation}" upper="${limit_up_rod_rotation}" />
+        <dynamics damping="0.1" friction="0.0" />
+    </joint>
+
+    <joint name="right_rod_joint" type="revolute">
+        <parent link="mainsupport" />
+        <child link="right_rod" />
+        <origin xyz="${-distance_mainsupport_rod_x} ${distance_mainsupport_rod_y} ${distance_mainsupport_rod_z}" rpy="${PI/2} ${PI/2} 0" />
+        <axis xyz="0 0 1" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_rod_rotation}" upper="${limit_up_rod_rotation}" />
+        <dynamics damping="0.1" friction="0.0" />
+    </joint>
+
+    <joint name="left_clamp_joint" type="revolute">
+        <parent link="left_gear" />
+        <child link="left_clamp" />
+        <origin xyz="${distance_gear_clamp_x} ${distance_gear_clamp_y} 0" rpy="0 0 ${PI/180*(98.86)}" />
+        <axis xyz="0 0 1" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_clamp_rotation}" upper="${limit_up_clamp_rotation}" />
+        <dynamics damping="0.1" friction="0.0" />
+    </joint>
+
+    <joint name="right_clamp_joint" type="revolute">
+        <parent link="right_gear" />
+        <child link="right_clamp" />
+        <origin xyz="${distance_gear_clamp_x} ${distance_gear_clamp_y} 0" rpy="0 0 ${PI/180*(98.86)}" />
+        <axis xyz="0 0 1" />
+        <limit effort="100.0" velocity="3.0" lower="${limit_low_clamp_rotation}" upper="${limit_up_clamp_rotation}" />
+        <dynamics damping="0.1" friction="0.0" />
+    </joint>
+
+</robot>

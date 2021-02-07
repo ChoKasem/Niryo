@@ -1,0 +1,244 @@
+<?xml version="1.0"?>
+
+<!--
+    niryo_one.urdf.xacro
+    Copyright (C) 2019 Niryo
+    All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="niryo_one">
+
+  <!-- gazebo ros control -->
+  <gazebo>
+      <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+	      <legacyModeNS>true</legacyModeNS>
+      </plugin>
+  </gazebo>
+
+  <!-- gazebo joint state publisher for all joints -->
+  <xacro:if value="$(arg standalone)">
+    <gazebo>
+      <plugin name="passive_joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+        <jointName>joint_1, joint_2, joint_3, joint_4, joint_5, joint_6, gripper_joint, right_gear_joint, left_rod_joint, right_rod_joint, left_clamp_joint, right_clamp_joint</jointName>
+        <updateRate>50.0</updateRate>
+        <alwaysOn>true</alwaysOn>
+      </plugin>
+    </gazebo>
+  </xacro:if>
+
+  <!-- gazebo mimic joint plugin -->
+  <gazebo>
+    <plugin filename="libroboticsgroup_gazebo_mimic_joint_plugin.so" name="mimic_joint_plugin">
+        <joint>gripper_joint</joint>
+        <mimicJoint>right_gear_joint</mimicJoint>
+        <hasPID/>
+        <multiplier>1.0</multiplier>
+    </plugin>
+  </gazebo>
+
+  <!-- gazebo grasp fix plugin -->
+  <gazebo>
+     <plugin name="gazebo_grasp_fix" filename="libgazebo_grasp_fix.so">
+          <arm>
+             <arm_name>niryo_one</arm_name>
+             <palm_link>tool_link</palm_link>
+             <gripper_link>left_gear</gripper_link>
+             <gripper_link>left_rod</gripper_link>
+             <gripper_link>left_clamp</gripper_link>
+             <gripper_link>right_gear</gripper_link>
+             <gripper_link>right_rod</gripper_link>
+             <gripper_link>right_clamp</gripper_link>
+          </arm>
+         <forces_angle_tolerance>100</forces_angle_tolerance>
+         <update_rate>4</update_rate>
+         <grip_count_threshold>4</grip_count_threshold>
+         <max_grip_count>8</max_grip_count>
+         <release_tolerance>0.005</release_tolerance>
+         <disable_collisions_on_attach>false</disable_collisions_on_attach>
+         <contact_topic>__default_topic__</contact_topic>
+      </plugin>
+  </gazebo>
+
+  <!-- preserve tool_link -->
+  <gazebo reference="tool_joint">
+    <provideFeedback>true</provideFeedback>
+    <disableFixedJointLumping>true</disableFixedJointLumping>
+  </gazebo>
+
+  <!-- hand_tool_joint -->
+  <gazebo reference="hand_tool_joint">
+    <disableFixedJointLumping>true</disableFixedJointLumping> 
+  </gazebo>
+
+  <!-- joints for closed chain -->
+  <gazebo>
+      <joint name="left_rod_clamp_joint" type="revolute">
+          <parent>left_rod</parent>
+          <child>left_clamp</child>
+          <pose>0 0.0201 0 0 0 0</pose>
+          <axis>
+              <xyz>0 0 1</xyz>
+              <limit>
+                  <lower>${-PI}</lower>
+                  <upper>${PI}</upper>
+                  <effort>100</effort>
+                  <velocity>3</velocity>
+              </limit>
+              <dynamics>
+                  <spring_reference>0</spring_reference>
+                  <spring_stiffness>0</spring_stiffness>
+              </dynamics>
+              <use_parent_model_frame>0</use_parent_model_frame>
+          </axis>
+          <physics>
+              <ode>
+                  <implicit_spring_damper>1</implicit_spring_damper>
+                  <cfm_damping>1</cfm_damping>
+                  <limit>
+                      <cfm>0</cfm>
+                      <erp>0.2</erp>
+                  </limit>
+              </ode>
+          </physics>
+      </joint>
+  </gazebo>
+
+  <gazebo>
+      <joint name="right_rod_clamp_joint" type="revolute">
+          <parent>right_rod</parent>
+          <child>right_clamp</child>
+          <pose>0 0.0201 0 0 0 0</pose>
+          <axis>
+              <xyz>0 0 1</xyz>
+              <limit>
+                  <lower>${-PI}</lower>
+                  <upper>${PI}</upper>
+                  <effort>100</effort>
+                  <velocity>3</velocity>
+              </limit>
+              <dynamics>
+                  <spring_reference>0</spring_reference>
+                  <spring_stiffness>0</spring_stiffness>
+              </dynamics>
+              <use_parent_model_frame>0</use_parent_model_frame>
+          </axis>
+          <physics>
+              <ode>
+                  <implicit_spring_damper>1</implicit_spring_damper>
+                  <cfm_damping>1</cfm_damping>
+                  <limit>
+                      <cfm>0</cfm>
+                      <erp>0.2</erp>
+                  </limit>
+              </ode>
+          </physics>
+      </joint>
+  </gazebo>
+
+  <!-- selfCollide -->
+  <gazebo reference="base_link">
+      <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="shoulder_link">
+      <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="arm_link">
+      <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="elbow_link">
+      <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="forearm_link">
+      <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="wrist_link">
+      <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="hand_link">
+      <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="mainsupport">
+    <selfCollide>False</selfCollide>
+  </gazebo>
+
+  <gazebo reference="motor">
+    <selfCollide>False</selfCollide>
+  </gazebo>
+
+  <gazebo reference="left_gear">
+    <selfCollide>False</selfCollide>
+  </gazebo>
+
+  <gazebo reference="right_gear">
+    <selfCollide>False</selfCollide>
+  </gazebo>
+
+  <gazebo reference="left_rod">
+    <selfCollide>False</selfCollide>
+  </gazebo>
+
+  <gazebo reference="right_rod">
+    <selfCollide>False</selfCollide>
+  </gazebo>
+
+  <gazebo reference="left_clamp">
+    <selfCollide>False</selfCollide>
+  </gazebo>
+
+  <gazebo reference="right_clamp">
+    <selfCollide>False</selfCollide>
+  </gazebo>
+
+  <!-- material -->
+	<gazebo reference="mainsupport">
+	    <material>Gazebo/DarkGrey</material>
+	</gazebo>
+
+	<gazebo reference="motor">
+	    <material>Gazebo/DarkGrey</material>
+	</gazebo>
+
+	<gazebo reference="left_gear">
+	    <material>Gazebo/DarkGrey</material>
+	</gazebo>
+
+	<gazebo reference="right_gear">
+	    <material>Gazebo/DarkGrey</material>
+	</gazebo>
+
+	<gazebo reference="left_rod">
+	    <material>Gazebo/DarkGrey</material>
+	</gazebo>
+
+	<gazebo reference="right_rod">
+	    <material>Gazebo/DarkGrey</material>
+	</gazebo>
+
+	<gazebo reference="left_clamp">
+	    <material>Gazebo/DarkGrey</material>
+	</gazebo>
+
+	<gazebo reference="right_clamp">
+	    <material>Gazebo/DarkGrey</material>
+	</gazebo>
+</robot>
