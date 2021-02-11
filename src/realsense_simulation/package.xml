@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>realsense_simulation</name>
+  <version>0.0.0</version>
+  <description>The realsense_simulation package</description>
+  <author>Yiying Lai</author>
+  <maintainer email="yiying.lai@outlook.com">Yiying Lai</maintainer>
+  <license>GPLv3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>realsense2_description</build_depend>
+  <build_export_depend>realsense2_description</build_export_depend>
+  <exec_depend>realsense2_description</exec_depend>
+</package>

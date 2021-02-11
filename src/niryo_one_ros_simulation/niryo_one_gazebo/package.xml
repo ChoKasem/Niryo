@@ -19,6 +19,9 @@
   <export>
     <gazebo_ros                                                                 
           gazebo_plugin_path="${prefix}/lib"
-          gazebo_model_path="${prefix}/.." /> 
+
+          gazebo_model_path="${prefix}/models"
+          /> 
+          
   </export>
 </package>

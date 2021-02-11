@@ -1,13 +1,12 @@
 <?xml version='1.0'?>
 <sdf version="1.4">
-  <model name="Bed">
-    <pose>0.0 0 0.0 0 0 0</pose>
+  <model name="Base">
+    <pose>0 0 0.5 0 0 0</pose>
     <static>true</static>
     <link name="link">
-
-    <!-- Random Inertia and Mass -->
       <inertial>
         <mass>1.0</mass>
+        
         <inertia> <!-- inertias are tricky to compute -->
           <!-- http://gazebosim.org/tutorials?tut=inertia&cat=build_robot -->
           <ixx>0.083</ixx>       <!-- for a box: ixx = 0.083 * mass * (y*y + z*z) -->
@@ -18,21 +17,21 @@
           <izz>0.083</izz>       <!-- for a box: izz = 0.083 * mass * (x*x + y*y) -->
         </inertia>
       </inertial>
+
       <collision name="collision">
         <geometry>
-          <box>
-            <size>0.508 0.762 0.076</size>
-          </box>
+          <cylinder>
+            <size>1 1 1</size>
+          </cylinder>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
-          <box>
-            <size>0.508 0.762 0.076</size>
-          </box>
+          <cylinder>
+            <size>1 1 1</size>
+          </cylinder>
         </geometry>
       </visual>
     </link>
   </model>
 </sdf>
-
