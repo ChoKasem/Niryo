@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find niryo_one_gazebo)/worlds/bed_making3.world"/>
+    <!-- more default parameters can be changed here -->
+  </include>
+
+  <!-- URDF -->
+	<param name="robot_description" command="$(find xacro)/xacro --inorder $(find niryo_one_description)/urdf/niryo_one.urdf.xacro" />
+
+	<!-- Load gazebo controller configurations -->
+	<rosparam file="$(find niryo_one_gazebo)/config/niryo_one_gazebo_controllers.yaml" command="load" />
+
+	<!-- Robot Pose -->
+	<arg name="x" default="0"/>
+  <arg name="y" default="0"/>
+  <arg name="z" default="0.5"/>
+  <arg name="roll" default="0"/>
+  <arg name="pitch" default="0"/>
+  <arg name="yaw" default="0"/>
+
+	<!-- Gazebo model - add a delay to let the controller start properly -->
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" 
+			args="-param robot_description -urdf -model niryo_one 
+			-x $(arg x) -y $(arg y) -z $(arg z)
+      -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"
+			respawn="false" output="screen"/>
+			
+
+
+</launch>
