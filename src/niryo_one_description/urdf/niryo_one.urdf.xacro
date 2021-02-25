@@ -548,7 +548,7 @@
     <!-- Adding RealSense Sensor  -->
     <joint name="camera_joint" type="fixed">
         <axis xyz="0 0 0" />
-        <origin xyz="0.18644192 0.17179403 0.29468409" rpy="-2.5516856 -0.9516703 -2.0573373"/>
+        <origin xyz="-0.101 0.274 0.257" rpy="-2.083 -0.176 -1.850"/>
         <parent link="base_link"/>
         <child link="camera_link"/>
     </joint>
