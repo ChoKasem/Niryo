@@ -15,7 +15,7 @@
     </include>
 
     <include>
-      <pose>0.3 0 0.25 0 0 1.57 </pose>
+      <pose>0.4 0 0.25 0 0 1.57 </pose>
       <uri>model://pillow</uri>
     </include>
 

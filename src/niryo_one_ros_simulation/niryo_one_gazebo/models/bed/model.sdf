@@ -68,6 +68,24 @@
           </box>
         </geometry>
       </visual>
+
+      <collision name="top_near">
+        <pose>-0.2 0 0.019 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.15 0.05</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="top_near">
+        <pose>-0.2 0 0.019 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.15 0.05</size>
+          </box>
+        </geometry>
+      </visual>
+
     </link>
   </model>
 </sdf>
