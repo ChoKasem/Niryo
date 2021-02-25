@@ -1,34 +1,70 @@
 <?xml version='1.0'?>
 <sdf version="1.4">
   <model name="Bed">
-    <pose>0.0 0 0.0 0 0 0</pose>
-    <static>true</static>
+    <static>false</static>
     <link name="link">
 
-    <!-- Random Inertia and Mass -->
+      <!-- Random Inertia and Mass -->
       <inertial>
         <mass>1.0</mass>
-        <inertia> <!-- inertias are tricky to compute -->
+        <inertia>          <!-- inertias are tricky to compute -->
           <!-- http://gazebosim.org/tutorials?tut=inertia&cat=build_robot -->
-          <ixx>0.083</ixx>       <!-- for a box: ixx = 0.083 * mass * (y*y + z*z) -->
-          <ixy>0.0</ixy>         <!-- for a box: ixy = 0 -->
-          <ixz>0.0</ixz>         <!-- for a box: ixz = 0 -->
-          <iyy>0.083</iyy>       <!-- for a box: iyy = 0.083 * mass * (x*x + z*z) -->
-          <iyz>0.0</iyz>         <!-- for a box: iyz = 0 -->
-          <izz>0.083</izz>       <!-- for a box: izz = 0.083 * mass * (x*x + y*y) -->
+          <ixx>0.083</ixx>          <!-- for a box: ixx = 0.083 * mass * (y*y + z*z) -->
+          <ixy>0.0</ixy>          <!-- for a box: ixy = 0 -->
+          <ixz>0.0</ixz>          <!-- for a box: ixz = 0 -->
+          <iyy>0.083</iyy>          <!-- for a box: iyy = 0.083 * mass * (x*x + z*z) -->
+          <iyz>0.0</iyz>          <!-- for a box: iyz = 0 -->
+          <izz>0.083</izz>          <!-- for a box: izz = 0.083 * mass * (x*x + y*y) -->
         </inertia>
       </inertial>
-      <collision name="collision">
+      <collision name="bottom">
+        <pose>0.0 0 0.0 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.508 0.762 0.076</size>
+            <size>0.508 0.762 0.038</size>
           </box>
         </geometry>
       </collision>
-      <visual name="visual">
+      <visual name="bottom">
+        <pose>0.0 0 0.0 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.508 0.762 0.076</size>
+            <size>0.508 0.762 0.038</size>
+          </box>
+        </geometry>
+      </visual>
+
+      <!-- Top Part -->
+      <collision name="top_left">
+        <pose>0.0 0.228 0.019 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.508 0.306 0.05</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="top_left">
+        <pose>0.0 0.228 0.019 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.508 0.306 0.05</size>
+          </box>
+        </geometry>
+      </visual>
+
+      <collision name="top_right">
+        <pose>0.0 -0.228 0.019 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.508 0.306 0.05</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="top_right">
+        <pose>0.0 -0.228 0.019 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.508 0.306 0.05</size>
           </box>
         </geometry>
       </visual>
