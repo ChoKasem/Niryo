@@ -547,7 +547,7 @@
 
     <!-- Adding RealSense Sensor  -->
     <joint name="camera_joint" type="fixed">
-        <axis xyz="0 0 0" />
+        <axis xyz="0 1 0" />
         <origin xyz="-0.101 0.274 0.257" rpy="-2.083 -0.176 -1.850"/>
         <parent link="base_link"/>
         <child link="camera_link"/>
@@ -577,14 +577,25 @@
         </inertial>
     </link>
 
-    <gazebo reference="camera_link">
+    <!-- Camera Adujustment (it's originally set to point in x, gotta rotate around y by 90) -->
+    <joint name="camera_joint_fix" type="fixed">
+        <axis xyz="0 1 0" />
+        <origin xyz="0 0 0" rpy="0 -1.5 1.5"/>
+        <parent link="camera_link"/>
+        <child link="camera_link_adjust"/>
+    </joint>
+
+    <link name="camera_link_adjust">
+    </link>
+
+    <gazebo reference="camera_link_adjust">
         <sensor type="camera" name="camera1">
         <update_rate>30.0</update_rate>
         <camera name="head">
             <horizontal_fov>1.3962634</horizontal_fov>
             <image>
-            <width>800</width>
-            <height>800</height>
+            <width>1920</width>
+            <height>1080</height>
             <format>R8G8B8</format>
             </image>
             <clip>
