@@ -20,86 +20,86 @@
 -->
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="niryo_one">
-  <!-- Arguments -->
-  <xacro:arg name="standalone" default="true" />
-  <xacro:arg name="parent_link" default="world" />
-  <xacro:arg name="pose_x" default="0.0" />
-  <xacro:arg name="pose_y" default="0.0" />
-  <xacro:arg name="pose_z" default="0.0" />
-  <xacro:arg name="rotation_z" default="0.0" />
+    <!-- Arguments -->
+    <xacro:arg name="standalone" default="true" />
+    <xacro:arg name="parent_link" default="world" />
+    <xacro:arg name="pose_x" default="0.0" />
+    <xacro:arg name="pose_y" default="0.0" />
+    <xacro:arg name="pose_z" default="0.0" />
+    <xacro:arg name="rotation_z" default="0.0" />
 
-	<!-- Properties -->
-  <xacro:property name="com_mainsupport_x" value="-0.00216" />
-  <xacro:property name="com_mainsupport_z" value="0.02135" />
-  <xacro:property name="com_mainsupport_y" value="-0.00204" />
-  <xacro:property name="com_left_gear_x" value="0.00326" />
-  <xacro:property name="com_left_gear_y" value="0.00988" />
-  <xacro:property name="com_left_gear_z" value="0.00032" />
-  <xacro:property name="com_right_gear_x" value="0.00374" />
-  <xacro:property name="com_right_gear_y" value="0.01129" />
-  <xacro:property name="com_rod_y" value="0.0147" />
-  <xacro:property name="com_clamp_x" value="0.00896" />
-  <xacro:property name="com_clamp_y" value="0.03059" />
-  <xacro:property name="com_motor_x" value="-0.00684" />
-  <xacro:property name="com_motor_z" value="0.0115" />
+    <!-- Properties -->
+    <xacro:property name="com_mainsupport_x" value="-0.00216" />
+    <xacro:property name="com_mainsupport_z" value="0.02135" />
+    <xacro:property name="com_mainsupport_y" value="-0.00204" />
+    <xacro:property name="com_left_gear_x" value="0.00326" />
+    <xacro:property name="com_left_gear_y" value="0.00988" />
+    <xacro:property name="com_left_gear_z" value="0.00032" />
+    <xacro:property name="com_right_gear_x" value="0.00374" />
+    <xacro:property name="com_right_gear_y" value="0.01129" />
+    <xacro:property name="com_rod_y" value="0.0147" />
+    <xacro:property name="com_clamp_x" value="0.00896" />
+    <xacro:property name="com_clamp_y" value="0.03059" />
+    <xacro:property name="com_motor_x" value="-0.00684" />
+    <xacro:property name="com_motor_z" value="0.0115" />
 
-  <xacro:property name="distance_origin_shoulder_z" value="0.103" />
-  <xacro:property name="distance_shoulder_arm_z" value="0.080" />
-  <xacro:property name="distance_arm_elbow_x" value="0.210" />
-  <xacro:property name="distance_elbow_forearm_x" value="0.0415" />
-  <xacro:property name="distance_elbow_forearm_y" value="0.030" />
-  <xacro:property name="distance_forearm_wrist_z" value="0.180" />
-  <xacro:property name="distance_wrist_hand_x" value="0.0164" />
-  <xacro:property name="distance_wrist_hand_y" value="-0.0055" />
-  <xacro:property name="distance_hand_tool" value="0.0073" />
-  <xacro:property name="distance_mainsupport_left_gear_x" value="-0.010" />
-  <xacro:property name="distance_mainsupport_left_gear_z" value="0.0246" />
-  <xacro:property name="distance_mainsupport_left_gear_y" value="-0.01225" />
-  <xacro:property name="distance_mainsupport_right_gear_x" value="0.010" />
-  <xacro:property name="distance_mainsupport_right_gear_z" value="0.0246" />
-  <xacro:property name="distance_mainsupport_right_gear_y" value="-0.01225" />
-  <xacro:property name="distance_mainsupport_rod_x" value="-0.0065" />
-  <xacro:property name="distance_mainsupport_rod_z" value="0.0466" />
-  <xacro:property name="distance_mainsupport_rod_y" value="-0.01225" />
-  <xacro:property name="distance_mainsupport_motor_x" value="-0.010" />
-  <xacro:property name="distance_mainsupport_motor_z" value="0.0246" />
-  <xacro:property name="distance_mainsupport_motor_y" value="-0.00425" />
-  <xacro:property name="distance_gear_clamp_x" value="0.00658" />
-  <xacro:property name="distance_gear_clamp_y" value="0.03438" />
-  <xacro:property name="distance_rod_clamp_y" value="0.02940" />
+    <xacro:property name="distance_origin_shoulder_z" value="0.103" />
+    <xacro:property name="distance_shoulder_arm_z" value="0.080" />
+    <xacro:property name="distance_arm_elbow_x" value="0.210" />
+    <xacro:property name="distance_elbow_forearm_x" value="0.0415" />
+    <xacro:property name="distance_elbow_forearm_y" value="0.030" />
+    <xacro:property name="distance_forearm_wrist_z" value="0.180" />
+    <xacro:property name="distance_wrist_hand_x" value="0.0164" />
+    <xacro:property name="distance_wrist_hand_y" value="-0.0055" />
+    <xacro:property name="distance_hand_tool" value="0.0073" />
+    <xacro:property name="distance_mainsupport_left_gear_x" value="-0.010" />
+    <xacro:property name="distance_mainsupport_left_gear_z" value="0.0246" />
+    <xacro:property name="distance_mainsupport_left_gear_y" value="-0.01225" />
+    <xacro:property name="distance_mainsupport_right_gear_x" value="0.010" />
+    <xacro:property name="distance_mainsupport_right_gear_z" value="0.0246" />
+    <xacro:property name="distance_mainsupport_right_gear_y" value="-0.01225" />
+    <xacro:property name="distance_mainsupport_rod_x" value="-0.0065" />
+    <xacro:property name="distance_mainsupport_rod_z" value="0.0466" />
+    <xacro:property name="distance_mainsupport_rod_y" value="-0.01225" />
+    <xacro:property name="distance_mainsupport_motor_x" value="-0.010" />
+    <xacro:property name="distance_mainsupport_motor_z" value="0.0246" />
+    <xacro:property name="distance_mainsupport_motor_y" value="-0.00425" />
+    <xacro:property name="distance_gear_clamp_x" value="0.00658" />
+    <xacro:property name="distance_gear_clamp_y" value="0.03438" />
+    <xacro:property name="distance_rod_clamp_y" value="0.02940" />
 
-	<xacro:property name="PI" value="3.14159265359" />
+    <xacro:property name="PI" value="3.14159265359" />
 
-  <xacro:property name="limit_low_shoulder_rotation" value="-3.05433" />
-  <xacro:property name="limit_up_shoulder_rotation" value="3.05433" />
-  <xacro:property name="limit_low_arm_rotation" value="-1.91986" />
-  <xacro:property name="limit_up_arm_rotation" value="0.640187" />
-  <xacro:property name="limit_low_elbow_rotation" value="-1.397485" />
-  <xacro:property name="limit_up_elbow_rotation" value="${PI/2}" />
-  <xacro:property name="limit_low_forearm_rotation" value="-3.05433" />
-  <xacro:property name="limit_up_forearm_rotation" value="3.05433" />
-  <xacro:property name="limit_low_wrist_rotation" value="-1.74533" />
-  <xacro:property name="limit_up_wrist_rotation" value="1.91986" />
-  <xacro:property name="limit_low_hand_rotation" value="-2.57436" />
-  <xacro:property name="limit_up_hand_rotation" value="2.57436" />
-  <xacro:property name="limit_low_hand_rotation" value="-2.57436" />
-  <xacro:property name="limit_up_hand_rotation" value="2.57436" />
-  <xacro:property name="limit_low_gear_rotation" value="0" />
-  <xacro:property name="limit_up_gear_rotation" value="1.2" />
-  <xacro:property name="limit_low_rod_rotation" value="${-PI}" />
-  <xacro:property name="limit_up_rod_rotation" value="${PI}" />
-  <xacro:property name="limit_low_clamp_rotation" value="${-PI}" />
-  <xacro:property name="limit_up_clamp_rotation" value="${PI}" />
+    <xacro:property name="limit_low_shoulder_rotation" value="-3.05433" />
+    <xacro:property name="limit_up_shoulder_rotation" value="3.05433" />
+    <xacro:property name="limit_low_arm_rotation" value="-1.91986" />
+    <xacro:property name="limit_up_arm_rotation" value="0.640187" />
+    <xacro:property name="limit_low_elbow_rotation" value="-1.397485" />
+    <xacro:property name="limit_up_elbow_rotation" value="${PI/2}" />
+    <xacro:property name="limit_low_forearm_rotation" value="-3.05433" />
+    <xacro:property name="limit_up_forearm_rotation" value="3.05433" />
+    <xacro:property name="limit_low_wrist_rotation" value="-1.74533" />
+    <xacro:property name="limit_up_wrist_rotation" value="1.91986" />
+    <xacro:property name="limit_low_hand_rotation" value="-2.57436" />
+    <xacro:property name="limit_up_hand_rotation" value="2.57436" />
+    <xacro:property name="limit_low_hand_rotation" value="-2.57436" />
+    <xacro:property name="limit_up_hand_rotation" value="2.57436" />
+    <xacro:property name="limit_low_gear_rotation" value="0" />
+    <xacro:property name="limit_up_gear_rotation" value="1.2" />
+    <xacro:property name="limit_low_rod_rotation" value="${-PI}" />
+    <xacro:property name="limit_up_rod_rotation" value="${PI}" />
+    <xacro:property name="limit_low_clamp_rotation" value="${-PI}" />
+    <xacro:property name="limit_up_clamp_rotation" value="${PI}" />
 
-  <!-- Includes -->
-	<xacro:include filename="$(find niryo_one_description)/urdf/niryo_one_gazebo.urdf.xacro"/>
-	<xacro:include filename="$(find niryo_one_description)/urdf/niryo_one_transmission.urdf.xacro"/>
+    <!-- Includes -->
+    <xacro:include filename="$(find niryo_one_description)/urdf/niryo_one_gazebo.urdf.xacro" />
+    <xacro:include filename="$(find niryo_one_description)/urdf/niryo_one_transmission.urdf.xacro" />
 
-	<!-- Links -->
+    <!-- Links -->
     <xacro:if value="$(arg standalone)">
-      <link name="world" />
+        <link name="world" />
     </xacro:if>
-	
+
     <link name="base_link">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
@@ -116,7 +116,7 @@
         <inertial>
             <origin xyz="0 0 ${distance_origin_shoulder_z / 2}" rpy="0 0 0" />
             <mass value="1.2" />
-            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015"/>
+            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015" />
         </inertial>
     </link>
 
@@ -136,7 +136,7 @@
         <inertial>
             <origin xyz="0 0 ${distance_shoulder_arm_z / 2}" rpy="0 0 0" />
             <mass value="0.8" />
-            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015"/>
+            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015" />
         </inertial>
     </link>
 
@@ -156,7 +156,7 @@
         <inertial>
             <origin xyz="${distance_arm_elbow_x / 2} 0.006 0.003" rpy="0 0 0" />
             <mass value="0.4" />
-            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015"/>
+            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015" />
         </inertial>
     </link>
 
@@ -176,7 +176,7 @@
         <inertial>
             <origin xyz="${distance_elbow_forearm_x / 2} ${distance_elbow_forearm_y / 2} 0" rpy="0 0 0" />
             <mass value="0.3" />
-            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015"/>
+            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015" />
         </inertial>
     </link>
 
@@ -196,7 +196,7 @@
         <inertial>
             <origin xyz="0 0 ${distance_forearm_wrist_z / 2}" rpy="0 0 0" />
             <mass value="0.3" />
-            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015"/>
+            <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015" />
         </inertial>
     </link>
 
@@ -216,7 +216,7 @@
         <inertial>
             <origin xyz="${distance_wrist_hand_x / 2} ${distance_wrist_hand_y / 2} 0" rpy="0 0 0" />
             <mass value="0.15" />
-            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
         </inertial>
     </link>
 
@@ -236,10 +236,10 @@
         <inertial>
             <origin xyz="0 0 ${distance_hand_tool / 2}" rpy="0 0 0" />
             <mass value="0.05" />
-            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
         </inertial>
     </link>
-	
+
     <link name="mainsupport">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
@@ -256,8 +256,8 @@
         <inertial>
             <origin xyz="${com_mainsupport_x} ${com_mainsupport_y} ${com_mainsupport_z}" rpy="0 0 0" />
             <mass value="0.01306" />
-			<!--<inertia ixx="4.94888021667e-06" ixy="0.0" ixz="0.0" iyy="4.27188246667e-06" iyz="0.0" izz="5.00673601667e-06"/>-->
-			<inertia ixx="4.94888021667e-03" ixy="0.0" ixz="0.0" iyy="4.27188246667e-03" iyz="0.0" izz="5.00673601667e-03"/>
+            <!--<inertia ixx="4.94888021667e-06" ixy="0.0" ixz="0.0" iyy="4.27188246667e-06" iyz="0.0" izz="5.00673601667e-06"/>-->
+            <inertia ixx="4.94888021667e-03" ixy="0.0" ixz="0.0" iyy="4.27188246667e-03" iyz="0.0" izz="5.00673601667e-03" />
         </inertial>
     </link>
 
@@ -277,8 +277,8 @@
         <inertial>
             <origin xyz="${com_motor_x} 0 ${com_motor_z}" rpy="0 0 0" />
             <mass value="0.01658" />
-			<!--<inertia ixx="1.803075e-06" ixy="0.0" ixz="0.0" iyy="2.797875e-06" iyz="0.0" izz="2.58648e-06"/>-->
-			<inertia ixx="1.803075e-03" ixy="0.0" ixz="0.0" iyy="2.797875e-03" iyz="0.0" izz="2.58648e-03"/>
+            <!--<inertia ixx="1.803075e-06" ixy="0.0" ixz="0.0" iyy="2.797875e-06" iyz="0.0" izz="2.58648e-06"/>-->
+            <inertia ixx="1.803075e-03" ixy="0.0" ixz="0.0" iyy="2.797875e-03" iyz="0.0" izz="2.58648e-03" />
         </inertial>
     </link>
 
@@ -298,8 +298,8 @@
         <inertial>
             <origin xyz="${com_left_gear_x} ${com_left_gear_y} ${com_left_gear_z}" rpy="0 0 0" />
             <mass value="0.0043" />
-			<!--<inertia ixx="9.39126584733e-07" ixy="0.0" ixz="0.0" iyy="2.218355466e-07" iyz="0.0" izz="1.06535700633e-06"/>-->
-			<inertia ixx="9.39126584733e-04" ixy="0.0" ixz="0.0" iyy="2.218355466e-04" iyz="0.0" izz="1.06535700633e-03"/>
+            <!--<inertia ixx="9.39126584733e-07" ixy="0.0" ixz="0.0" iyy="2.218355466e-07" iyz="0.0" izz="1.06535700633e-06"/>-->
+            <inertia ixx="9.39126584733e-04" ixy="0.0" ixz="0.0" iyy="2.218355466e-04" iyz="0.0" izz="1.06535700633e-03" />
         </inertial>
     </link>
 
@@ -320,7 +320,7 @@
             <origin xyz="${com_right_gear_x} ${com_right_gear_y} 0" rpy="0 0 0" />
             <mass value="0.00375" />
             <!--<inertia ixx="7.95137005e-07" ixy="0.0" ixz="0.0" iyy="1.7221403125e-07" iyz="0.0" izz="9.2735103625e-07"/>-->
-			<inertia ixx="7.95137005e-04" ixy="0.0" ixz="0.0" iyy="1.7221403125e-04" iyz="0.0" izz="9.2735103625e-04"/>
+            <inertia ixx="7.95137005e-04" ixy="0.0" ixz="0.0" iyy="1.7221403125e-04" iyz="0.0" izz="9.2735103625e-04" />
         </inertial>
     </link>
 
@@ -340,9 +340,9 @@
         <inertial>
             <origin xyz="0 ${com_rod_y} 0" rpy="0 0 0" />
             <mass value="0.00214" />
-			<!--<inertia ixx="243.37e-9" ixy="-0.01e-9" ixz="0.0" iyy="76.17e-9" iyz="0.0" izz="198.23e-9"/>-->
-			<inertia ixx="243.37e-6" ixy="-0.01e-6" ixz="0.0" iyy="76.17e-6" iyz="0.0" izz="198.23e-6"/>
-		</inertial>
+            <!--<inertia ixx="243.37e-9" ixy="-0.01e-9" ixz="0.0" iyy="76.17e-9" iyz="0.0" izz="198.23e-9"/>-->
+            <inertia ixx="243.37e-6" ixy="-0.01e-6" ixz="0.0" iyy="76.17e-6" iyz="0.0" izz="198.23e-6" />
+        </inertial>
     </link>
 
     <link name="right_rod">
@@ -361,9 +361,9 @@
         <inertial>
             <origin xyz="0 ${com_rod_y} 0" rpy="0 0 0" />
             <mass value="0.00214" />
-			<!--<inertia ixx="243.37e-9" ixy="-0.01e-9" ixz="0.0" iyy="76.17e-9" iyz="0.0" izz="198.23e-9"/>-->
-			<inertia ixx="243.37e-6" ixy="-0.01e-6" ixz="0.0" iyy="76.17e-6" iyz="0.0" izz="198.23e-6"/>
-		</inertial>
+            <!--<inertia ixx="243.37e-9" ixy="-0.01e-9" ixz="0.0" iyy="76.17e-9" iyz="0.0" izz="198.23e-9"/>-->
+            <inertia ixx="243.37e-6" ixy="-0.01e-6" ixz="0.0" iyy="76.17e-6" iyz="0.0" izz="198.23e-6" />
+        </inertial>
     </link>
 
     <link name="left_clamp">
@@ -382,9 +382,9 @@
         <inertial>
             <origin xyz="${com_clamp_x} ${com_clamp_y} 0" rpy="0 0 0" />
             <mass value="0.00662" />
-			<!--<inertia ixx="1953.77e-9" ixy="447.97e-9" ixz="0.0" iyy="339.54e-9" iyz="0.0" izz="2024.22e-9"/>-->
-			<inertia ixx="1953.77e-6" ixy="447.97e-6" ixz="0.0" iyy="339.54e-6" iyz="0.0" izz="2024.22e-6"/>
-		</inertial>
+            <!--<inertia ixx="1953.77e-9" ixy="447.97e-9" ixz="0.0" iyy="339.54e-9" iyz="0.0" izz="2024.22e-9"/>-->
+            <inertia ixx="1953.77e-6" ixy="447.97e-6" ixz="0.0" iyy="339.54e-6" iyz="0.0" izz="2024.22e-6" />
+        </inertial>
     </link>
 
     <link name="right_clamp">
@@ -403,18 +403,17 @@
         <inertial>
             <origin xyz="${com_clamp_x} ${com_clamp_y} 0" rpy="0 0 0" />
             <mass value="0.00662" />
-			<!--<inertia ixx="1953.77e-9" ixy="447.97e-9" ixz="0.0" iyy="339.54e-9" iyz="0.0" izz="2024.22e-9"/>-->
-			<inertia ixx="1953.77e-6" ixy="447.97e-6" ixz="0.0" iyy="339.54e-6" iyz="0.0" izz="2024.22e-6"/>
-		</inertial>
+            <!--<inertia ixx="1953.77e-9" ixy="447.97e-9" ixz="0.0" iyy="339.54e-9" iyz="0.0" izz="2024.22e-9"/>-->
+            <inertia ixx="1953.77e-6" ixy="447.97e-6" ixz="0.0" iyy="339.54e-6" iyz="0.0" izz="2024.22e-6" />
+        </inertial>
     </link>
 
-    <link name="tool_link">
-    </link>
+    <link name="tool_link"></link>
 
     <!--Joints -->
     <joint name="joint_base" type="fixed">
-        <parent link="$(arg parent_link)"/>
-        <child link="base_link"/>
+        <parent link="$(arg parent_link)" />
+        <child link="base_link" />
         <origin xyz="$(arg pose_x) $(arg pose_y) $(arg pose_z)" rpy="0 0 $(arg rotation_z)" />
     </joint>
 
@@ -484,11 +483,11 @@
         <origin xyz="0 0 0" rpy="0 0 0" />
     </joint>
 
-	<joint name="motor_joint" type="fixed">
-		<parent link="mainsupport" />
-		<child link="motor" />
-		<origin xyz="${distance_mainsupport_motor_x} ${distance_mainsupport_motor_y} ${distance_mainsupport_motor_z}" rpy="${-PI/2} ${PI} 0" />
-	</joint>
+    <joint name="motor_joint" type="fixed">
+        <parent link="mainsupport" />
+        <child link="motor" />
+        <origin xyz="${distance_mainsupport_motor_x} ${distance_mainsupport_motor_y} ${distance_mainsupport_motor_z}" rpy="${-PI/2} ${PI} 0" />
+    </joint>
 
     <joint name="gripper_joint" type="revolute">
         <parent link="mainsupport" />
@@ -506,7 +505,7 @@
         <axis xyz="0 0 1" />
         <limit effort="100.0" velocity="3.0" lower="${limit_low_gear_rotation}" upper="${limit_up_gear_rotation}" />
         <dynamics damping="0.1" friction="0.0" />
-    	<mimic joint="gripper_joint" multiplier="1" offset="0" />
+        <mimic joint="gripper_joint" multiplier="1" offset="0" />
     </joint>
 
     <joint name="left_rod_joint" type="revolute">
@@ -548,84 +547,86 @@
     <!-- Adding RealSense Sensor  -->
     <joint name="camera_joint" type="fixed">
         <axis xyz="0 1 0" />
-        <origin xyz="-0.101 0.274 0.257" rpy="-2.083 -0.176 -1.850"/>
-        <parent link="base_link"/>
-        <child link="camera_link"/>
+        <origin xyz="-0.101 0.274 0.257" rpy="-2.083 -0.176 -1.850" />
+        <parent link="base_link" />
+        <child link="camera_link" />
     </joint>
 
-      <!-- Camera -->
+    <!-- Camera -->
     <link name="camera_link">
         <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-        <box size="0.05 0.05 0.05"/>
-        </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.05 0.05 0.05" />
+            </geometry>
         </collision>
 
         <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-        <box size="0.05 0.05 0.05"/>
-        </geometry>
-        <material name="red"/>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.05 0.05 0.05" />
+            </geometry>
+            <material name="red" />
         </visual>
 
         <inertial>
-        <mass value="1e-5" />
-        <origin xyz="0 0 0.0" rpy="0 0 0"/>
-        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+            <mass value="1e-5" />
+            <origin xyz="0 0 0.0" rpy="0 0 0" />
+            <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
         </inertial>
     </link>
 
     <!-- Camera Adujustment (it's originally set to point in x, gotta rotate around y by 90) -->
     <joint name="camera_joint_fix" type="fixed">
         <axis xyz="0 1 0" />
-        <origin xyz="0 0 0" rpy="0 -1.5 1.5"/>
-        <parent link="camera_link"/>
-        <child link="camera_link_adjust"/>
+        <origin xyz="0 0 0" rpy="0 -1.5 1.5" />
+        <parent link="camera_link" />
+        <child link="camera_link_adjust" />
     </joint>
 
-    <link name="camera_link_adjust">
-    </link>
+    <link name="camera_link_adjust"></link>
 
     <gazebo reference="camera_link_adjust">
-        <sensor type="camera" name="camera1">
-        <update_rate>30.0</update_rate>
-        <camera name="head">
-            <horizontal_fov>1.3962634</horizontal_fov>
-            <image>
-            <width>1920</width>
-            <height>1080</height>
-            <format>R8G8B8</format>
-            </image>
-            <clip>
-            <near>0.02</near>
-            <far>300</far>
-            </clip>
-            <noise>
-            <type>gaussian</type>
-            <!-- Noise is sampled independently per pixel on each frame.
-                That pixel's noise value is added to each of its color
-                channels, which at that point lie in the range [0,1]. -->
-            <mean>0.0</mean>
-            <stddev>0.007</stddev>
-            </noise>
-        </camera>
-        <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-            <alwaysOn>true</alwaysOn>
-            <updateRate>0.0</updateRate>
-            <cameraName>niryo/camera1</cameraName>
-            <imageTopicName>image_raw</imageTopicName>
-            <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-            <frameName>camera_link</frameName>
-            <hackBaseline>0.07</hackBaseline>
-            <distortionK1>0.0</distortionK1>
-            <distortionK2>0.0</distortionK2>
-            <distortionK3>0.0</distortionK3>
-            <distortionT1>0.0</distortionT1>
-            <distortionT2>0.0</distortionT2>
-        </plugin>
+        <sensor name="camera_link_adjustcamera" type="depth">
+            <update_rate>20</update_rate>
+            <camera>
+                <horizontal_fov>1.047198</horizontal_fov>
+                <image>
+                    <width>640</width>
+                    <height>480</height>
+                    <format>R8G8B8</format>
+                </image>
+                <clip>
+                    <near>0.05</near>
+                    <far>3</far>
+                </clip>
+            </camera>
+            <plugin name="depth_controller" filename="libgazebo_ros_openni_kinect.so">
+                <baseline>0.2</baseline>
+                <alwaysOn>true</alwaysOn>
+                <updateRate>1.0</updateRate>
+                <cameraName>camera_ir</cameraName>
+                <imageTopicName>/camera/color/image_raw</imageTopicName>
+                <cameraInfoTopicName>/camera/color/camera_info</cameraInfoTopicName>
+                <depthImageTopicName>/camera/depth/image_raw</depthImageTopicName>
+                <depthImageInfoTopicName>/camera/depth/camera_info</depthImageInfoTopicName>
+                <pointCloudTopicName>/camera/depth/points</pointCloudTopicName>
+                <frameName>kinect</frameName>
+                <pointCloudCutoff>0.5</pointCloudCutoff>
+                <pointCloudCutoffMax>3.0</pointCloudCutoffMax>
+                <distortionK1>0.00000001</distortionK1>
+                <distortionK2>0.00000001</distortionK2>
+                <distortionK3>0.00000001</distortionK3>
+                <distortionT1>0.00000001</distortionT1>
+                <distortionT2>0.00000001</distortionT2>
+                <CxPrime>0</CxPrime>
+                <Cx>0</Cx>
+                <Cy>0</Cy>
+                <focalLength>0</focalLength>
+                <hackBaseline>0</hackBaseline>
+            </plugin>
         </sensor>
     </gazebo>
+
 
 </robot>

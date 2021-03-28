@@ -25,6 +25,8 @@ class Niryo_State:
         rospy.Subscriber('/joint_states', JointState, self.joint_cb)
         rospy.Subscriber('/niryo/camera1/image_raw', Image, self.image_cb)
 
+        #need to get pillow state from Gazebo (only for simulation, for real robot would be image processing)
+
         self.image = None
         self.joint_angle = None
     
@@ -41,7 +43,8 @@ class Niryo_State:
 
 if __name__ == '__main__':
     state = Niryo_State()
-    rate = rospy.Rate(50)
+    rate = rospy.Rate(10)
     while not rospy.is_shutdown():
-        print(state.joint_angle)
-        rate.sleep()
+        image = np.array(state.image)
+        print(image)
+        rospy.sleep(5)
