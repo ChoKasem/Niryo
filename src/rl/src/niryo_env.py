@@ -4,16 +4,16 @@ import numpy as np
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState, Image
+import niryo_moveit_commander
 
+# TODO have Niryo inherit moveit commander, or maybe super
 class Niryo:
     def __init__(self):
         self.state = Niryo_State()
+        self.command = niryo_moveit_commander.MoveGroupPythonInteface()
     
-    def step(x, y, z): # move end effector to desire pose
-        pass
-        #how to publish msg to moveit and let it control
-
-
+    def go_to_pose(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
+        self.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
     
 
     def compute_reward(self):
@@ -49,8 +49,12 @@ class Niryo_State:
 
 
 if __name__ == '__main__':
-    state = Niryo_State()
-    rate = rospy.Rate(10)
-    while not rospy.is_shutdown():
-        print(state.depth)
-        rospy.sleep(5)
+    # state = Niryo_State()
+    # rate = rospy.Rate(10)
+    # while not rospy.is_shutdown():
+    #     print(state.depth)
+    #     rospy.sleep(5)
+    
+    # niryo_moveit_commander.main()
+
+    niryo = Niryo()

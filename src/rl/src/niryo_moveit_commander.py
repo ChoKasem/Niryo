@@ -33,10 +33,10 @@ def all_close(goal, actual, tolerance):
   return True
 
 
-class MoveGroupPythonIntefaceTutorial(object):
-  """MoveGroupPythonIntefaceTutorial"""
+class MoveGroupPythonInteface(object):
+  """MoveGroupPythonInteface"""
   def __init__(self):
-    super(MoveGroupPythonIntefaceTutorial, self).__init__()
+    super(MoveGroupPythonInteface, self).__init__()
 
     ## BEGIN_SUB_TUTORIAL setup
     ##
@@ -102,7 +102,7 @@ class MoveGroupPythonIntefaceTutorial(object):
     self.eef_link = eef_link
     self.group_names = group_names
 
-  def go_to_pose_goal(self):
+  def go_to_pose_goal(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
     # Copy class variables to local variables to make the web tutorials more clear.
     # In practice, you should use the class variables directly unless you have a good
     # reason not to.
@@ -115,13 +115,23 @@ class MoveGroupPythonIntefaceTutorial(object):
     ## We can plan a motion for this group to a desired pose for the
     ## end-effector:
     pose_goal = geometry_msgs.msg.Pose()
-    pose_goal.orientation.x = 0.361772034518
-    pose_goal.orientation.y = 0.609889820653
-    pose_goal.orientation.z = 0.606442770113
-    pose_goal.orientation.w = 0.359697884734
-    pose_goal.position.x = 0.215643591815
-    pose_goal.position.y = 0.117823111836
-    pose_goal.position.z = 0.41643872883
+    # Set default pose if no input is given
+    if pos_x = 0:
+        pose_goal.orientation.x = 0.361772034518
+        pose_goal.orientation.y = 0.609889820653
+        pose_goal.orientation.z = 0.606442770113
+        pose_goal.orientation.w = 0.359697884734
+        pose_goal.position.x = 0.215643591815
+        pose_goal.position.y = 0.117823111836
+        pose_goal.position.z = 0.41643872883
+    else:
+        pose_goal.orientation.x = ori_x
+        pose_goal.orientation.y = ori_y
+        pose_goal.orientation.z = ori_z
+        pose_goal.orientation.w = ori_w
+        pose_goal.position.x = pos_x
+        pose_goal.position.y = pos_y
+        pose_goal.position.z = pos_y
     group.set_pose_target(pose_goal)
 
     ## Now, we call the planner to compute the plan and execute it.
