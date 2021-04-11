@@ -42,8 +42,7 @@ class MoveGroupPythonInteface(object):
     ##
     ## First initialize `moveit_commander`_ and a `rospy`_ node:
     moveit_commander.roscpp_initialize(sys.argv)
-    rospy.init_node('move_group_python_interface_tutorial',
-                    anonymous=True)
+    rospy.loginfo("Initialized Niryo Moveit Commander Publisher")
 
     ## Instantiate a `RobotCommander`_ object. This object is the outer-level interface to
     ## the robot:
@@ -102,7 +101,7 @@ class MoveGroupPythonInteface(object):
     self.eef_link = eef_link
     self.group_names = group_names
 
-  def go_to_pose_goal(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
+  def go_to_pose_goal(self, pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w):
     # Copy class variables to local variables to make the web tutorials more clear.
     # In practice, you should use the class variables directly unless you have a good
     # reason not to.
@@ -115,23 +114,16 @@ class MoveGroupPythonInteface(object):
     ## We can plan a motion for this group to a desired pose for the
     ## end-effector:
     pose_goal = geometry_msgs.msg.Pose()
-    # Set default pose if no input is given
-    if pos_x = 0:
-        pose_goal.orientation.x = 0.361772034518
-        pose_goal.orientation.y = 0.609889820653
-        pose_goal.orientation.z = 0.606442770113
-        pose_goal.orientation.w = 0.359697884734
-        pose_goal.position.x = 0.215643591815
-        pose_goal.position.y = 0.117823111836
-        pose_goal.position.z = 0.41643872883
-    else:
-        pose_goal.orientation.x = ori_x
-        pose_goal.orientation.y = ori_y
-        pose_goal.orientation.z = ori_z
-        pose_goal.orientation.w = ori_w
-        pose_goal.position.x = pos_x
-        pose_goal.position.y = pos_y
-        pose_goal.position.z = pos_y
+
+    pose_goal.position.x = pos_x
+    pose_goal.position.y = pos_y
+    pose_goal.position.z = pos_z
+    pose_goal.orientation.x = ori_x
+    pose_goal.orientation.y = ori_y
+    pose_goal.orientation.z = ori_z
+    pose_goal.orientation.w = ori_w
+    
+
     group.set_pose_target(pose_goal)
 
     ## Now, we call the planner to compute the plan and execute it.
@@ -148,7 +140,45 @@ class MoveGroupPythonInteface(object):
     # Note that since this section of code will not be included in the tutorials
     # we use the class variable rather than the copied state variable
     current_pose = self.group.get_current_pose().pose
-    return all_close(pose_goal, current_pose, 0.01)    
+    return all_close(pose_goal, current_pose, 0.01)
+
+  def go_to_joint_state(self, joint0, joint1, joint2, joint3, joint4, joint5):
+    # Copy class variables to local variables to make the web tutorials more clear.
+    # In practice, you should use the class variables directly unless you have a good
+    # reason not to.
+    group = self.group
+
+    ## BEGIN_SUB_TUTORIAL plan_to_joint_state
+    ##
+    ## Planning to a Joint Goal
+    ## ^^^^^^^^^^^^^^^^^^^^^^^^
+    ## The Panda's zero configuration is at a `singularity <https://www.quora.com/Robotics-What-is-meant-by-kinematic-singularity>`_ so the first
+    ## thing we want to do is move it to a slightly better configuration.
+    # We can get the joint values from the group and adjust some of the values:
+    joint_goal = group.get_current_joint_values()
+
+    joint_goal[0] = joint0
+    joint_goal[1] = joint1
+    joint_goal[2] = joint2
+    joint_goal[3] = joint3
+    joint_goal[4] = joint4
+    joint_goal[5] = joint5
+
+    # The go command can be called with joint values, poses, or without any
+    # parameters if you have already set the pose or joint target for the group
+    group.go(joint_goal, wait=True)
+
+    # Calling ``stop()`` ensures that there is no residual movement
+    group.stop()
+
+    ## END_SUB_TUTORIAL
+
+    # For testing:
+    # Note that since this section of code will not be included in the tutorials
+    # we use the class variable rather than the copied state variable
+    current_joints = self.group.get_current_joint_values()
+    return all_close(joint_goal, current_joints, 0.01)
+    
 
 def main():
     print "============ Press `Enter` to begin the tutorial by setting up the moveit_commander (press ctrl-d to exit) ..."
