@@ -35,7 +35,7 @@ def all_close(goal, actual, tolerance):
 
 class MoveGroupPythonInteface(object):
   """MoveGroupPythonInteface"""
-  def __init__(self):
+  def __init__(self, group_name):
     super(MoveGroupPythonInteface, self).__init__()
 
     ## BEGIN_SUB_TUTORIAL setup
@@ -57,7 +57,6 @@ class MoveGroupPythonInteface(object):
     ## arm so we set ``group_name = panda_arm``. If you are using a different robot,
     ## you should change this value to the name of your robot arm planning group.
     ## This interface can be used to plan and execute motions on the Panda:
-    group_name = "arm"
     group = moveit_commander.MoveGroupCommander(group_name)
 
     ## We create a `DisplayTrajectory`_ publisher which is used later to publish
@@ -142,7 +141,7 @@ class MoveGroupPythonInteface(object):
     current_pose = self.group.get_current_pose().pose
     return all_close(pose_goal, current_pose, 0.01)
 
-  def go_to_joint_state(self, joint0, joint1, joint2, joint3, joint4, joint5):
+  def go_to_joint_state(self, joint_goal):
     # Copy class variables to local variables to make the web tutorials more clear.
     # In practice, you should use the class variables directly unless you have a good
     # reason not to.
@@ -155,14 +154,16 @@ class MoveGroupPythonInteface(object):
     ## The Panda's zero configuration is at a `singularity <https://www.quora.com/Robotics-What-is-meant-by-kinematic-singularity>`_ so the first
     ## thing we want to do is move it to a slightly better configuration.
     # We can get the joint values from the group and adjust some of the values:
-    joint_goal = group.get_current_joint_values()
+    # joint_goal = group.get_current_joint_values()
 
-    joint_goal[0] = joint0
-    joint_goal[1] = joint1
-    joint_goal[2] = joint2
-    joint_goal[3] = joint3
-    joint_goal[4] = joint4
-    joint_goal[5] = joint5
+    # joint_goal[0] = joint0
+    # joint_goal[1] = joint1
+    # joint_goal[2] = joint2
+    # joint_goal[3] = joint3
+    # joint_goal[4] = joint4
+    # joint_goal[5] = joint5
+    print("Joint Goal")
+    print(joint_goal)
 
     # The go command can be called with joint values, poses, or without any
     # parameters if you have already set the pose or joint target for the group
