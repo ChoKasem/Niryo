@@ -90,8 +90,11 @@ def test():
     raw_input()
     niryo.reset_pose()
 
+def test2():
+    niryo = Niryo()
+    while True:
+        print(niryo.state.joint_angle)
 
 if __name__ == '__main__':
-    test()
-
+    test2()
     
