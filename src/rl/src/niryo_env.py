@@ -5,6 +5,10 @@ import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState, Image
 from control_msgs.msg import GripperCommandActionGoal
+from gazebo_msgs.srv import *
+from geometry_msgs.msg import *
+from std_srvs.srv import Empty
+
 import niryo_moveit_commander
 
 # TODO have Niryo inherit moveit commander, or maybe super
@@ -28,6 +32,10 @@ class Niryo:
         self.gripper.grab_angle(0)
 
     def step(self, end_effector_pose, gripper_angle):
+        '''
+        Input: end_effector_pose -> list
+                gripper_angle -> float
+        '''
         go_to_pose(end_effector_pose[0],end_effector_pose[1],end_effector_pose[2],end_effector_pose[3],end_effector_pose[4],end_effector_pose[5],end_effector_pose[6])
         gripper.grab_angle(gripper_angle)
 
@@ -100,10 +108,19 @@ class Gripper:
         
 
 class World:
-    
-    def reset_world(self):
-        # remove bed and pillow and respawn them
+    def __init__(self):
         pass
+
+
+
+    def reset(self):
+        # remove bed and pillow and respawn them
+        rospy.wait_for_service('/gazebo/reset_world')
+        try:
+            self.reset_gazebo_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)
+        self.reset_gazebo_world = None
 
 def test_arm():
     # niryo = Niryo()
@@ -117,8 +134,13 @@ def test_gripper():
     rospy.sleep(2)
     niryo.gripper.grab_angle(0.3)
 
+def test_reset_world():
+    pass
+
 if __name__ == '__main__':
     niryo = Niryo()
     test_arm()
     test_gripper()
+    # world = World()
+    # world.reset()
     
