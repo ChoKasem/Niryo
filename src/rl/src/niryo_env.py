@@ -111,8 +111,6 @@ class World:
     def __init__(self):
         pass
 
-
-
     def reset(self):
         # remove bed and pillow and respawn them
         rospy.wait_for_service('/gazebo/reset_world')
@@ -120,7 +118,7 @@ class World:
             self.reset_gazebo_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
-        self.reset_gazebo_world = None
+        ans = self.reset_gazebo_world()
 
 def test_arm():
     # niryo = Niryo()
@@ -134,13 +132,14 @@ def test_gripper():
     rospy.sleep(2)
     niryo.gripper.grab_angle(0.3)
 
-def test_reset_world():
-    pass
+def test_world():
+    world = World()
+    world.reset()
 
 if __name__ == '__main__':
-    niryo = Niryo()
-    test_arm()
-    test_gripper()
-    # world = World()
-    # world.reset()
+    # niryo = Niryo()
+    # test_arm()
+    # test_gripper()
+    world = World()
+    world.reset()
     
