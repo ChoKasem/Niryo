@@ -25,13 +25,18 @@ class Niryo:
         # starting joint state
         joints = [-4.00038318737e-05, -0.00169649498877, -0.00135103272703, 1.82992589703e-05, -0.0005746965517, 7.78535278902e-05]
         self.command.go_to_joint_state(joints)
-        gripper.grab_angle(0)
+        self.gripper.grab_angle(0)
 
     def step(self, end_effector_pose, gripper_angle):
         go_to_pose(end_effector_pose[0],end_effector_pose[1],end_effector_pose[2],end_effector_pose[3],end_effector_pose[4],end_effector_pose[5],end_effector_pose[6])
         gripper.grab_angle(gripper_angle)
 
     def compute_reward(self):
+        # possible neg reward if arm hit other object and + reward if get pillow to desire pose
+        pass
+
+    def close(self):
+        # close the terminal and everything after finish training
         pass
 
 class Arm:
@@ -95,27 +100,25 @@ class Gripper:
         
 
 class World:
-    pass
+    
+    def reset_world(self):
+        # remove bed and pillow and respawn them
+        pass
 
 def test_arm():
-    niryo = Niryo()
+    # niryo = Niryo()
     niryo.command.go_to_pose_goal(0.350840341432, -0.058138712168, 0.276432223498, 0.50174247142, 0.501506407284, 0.498433947182, 0.498306548344)
-    print("Press Enter")
-    raw_input()
     niryo.reset_pose()
 
-def test2():
-    niryo = Niryo()
-    while True:
-        print(niryo.state.joint_angle)
-
 def test_gripper():
-    niryo = Niryo()
+    # niryo = Niryo()
+    rospy.sleep(2)
     niryo.gripper.grab_angle(1.2)
     rospy.sleep(2)
     niryo.gripper.grab_angle(0.3)
 
 if __name__ == '__main__':
+    niryo = Niryo()
     test_arm()
-    # test_gripper()
+    test_gripper()
     
