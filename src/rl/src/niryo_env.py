@@ -5,7 +5,7 @@ import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState, Image
 from control_msgs.msg import GripperCommandActionGoal
-from gazebo_msgs.srv import *
+from gazebo_msgs.srv import GetModelState
 from geometry_msgs.msg import *
 from std_srvs.srv import Empty
 
@@ -33,11 +33,22 @@ class Niryo:
 
     def step(self, end_effector_pose, gripper_angle):
         '''
-        Input: end_effector_pose -> list
-                gripper_angle -> float
+        Step action which move the robot and gripper
+
+        Args: 
+            end_effector_pose (list)
+            gripper_angle (float)
+
+        Returns:
+            observation 
+            reward (float)
+            done (bool)
+            info (string)
         '''
         go_to_pose(end_effector_pose[0],end_effector_pose[1],end_effector_pose[2],end_effector_pose[3],end_effector_pose[4],end_effector_pose[5],end_effector_pose[6])
         gripper.grab_angle(gripper_angle)
+
+        return self.observation, self.reward, self.done, self.info
 
     def compute_reward(self):
         # possible neg reward if arm hit other object and + reward if get pillow to desire pose
@@ -62,6 +73,7 @@ class Arm:
         rospy.loginfo("Initializing State Subscriber")
         
         rospy.Subscriber('/joint_states', JointState, self.joint_cb)
+        rospy.Subscriber('/')
         rospy.Subscriber('/camera/color/image_raw', Image, self.image_cb)
         rospy.Subscriber('/camera/depth/image_raw', Image, self.depth_cb)
 
@@ -109,7 +121,7 @@ class Gripper:
 
 class World:
     def __init__(self):
-        pass
+        self.pillow_z = self.get_height("Pillow")
 
     def reset(self):
         # remove bed and pillow and respawn them
@@ -119,6 +131,21 @@ class World:
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
         ans = self.reset_gazebo_world()
+
+    def get_model_state(self, model):
+        rospy.wait_for_service('/gazebo/get_model_state')
+        try:
+            self.get_model_state = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)
+        state = self.get_model_state(model,"")
+        # print(state)
+        return state
+
+    def get_height(self, model):
+        state = self.get_model_state("Pillow")
+        # print(state.pose.position.z)
+        return state.pose.position.z
 
 def test_arm():
     # niryo = Niryo()
@@ -141,5 +168,7 @@ if __name__ == '__main__':
     # test_arm()
     # test_gripper()
     world = World()
-    world.reset()
+    # world.get_model_state("Pillow")
+    print(world.pillow_z)
+    # world.reset()
     
