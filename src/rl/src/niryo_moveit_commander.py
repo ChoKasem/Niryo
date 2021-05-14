@@ -141,6 +141,10 @@ class MoveGroupPythonInteface(object):
     current_pose = self.group.get_current_pose().pose
     return all_close(pose_goal, current_pose, 0.01)
 
+  def get_pose(self):
+    group = self.group
+    return self.group.get_current_pose().pose
+
   def go_to_joint_state(self, joint_goal):
     # Copy class variables to local variables to make the web tutorials more clear.
     # In practice, you should use the class variables directly unless you have a good

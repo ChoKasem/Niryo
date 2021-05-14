@@ -11,24 +11,23 @@ from std_srvs.srv import Empty
 
 import niryo_moveit_commander
 
-# TODO have Niryo inherit moveit commander, or maybe super
 class Niryo:
     def __init__(self):
         rospy.loginfo("Initialize Niryo RL Node")
         rospy.init_node('Niryo_RL_Node',
                     anonymous=True)
         self.arm = Arm()            
-        self.command = niryo_moveit_commander.MoveGroupPythonInteface("arm")
-        
         self.gripper = Gripper()
+        self.world = World()
+        self.done = False
     
     def go_to_pose(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
-        self.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
+        self.arm.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
     
     def reset_pose(self):
         # starting joint state
         joints = [-4.00038318737e-05, -0.00169649498877, -0.00135103272703, 1.82992589703e-05, -0.0005746965517, 7.78535278902e-05]
-        self.command.go_to_joint_state(joints)
+        self.arm.command.go_to_joint_state(joints)
         self.gripper.grab_angle(0)
 
     def step(self, end_effector_pose, gripper_angle):
@@ -40,20 +39,26 @@ class Niryo:
             gripper_angle (float)
 
         Returns:
-            observation 
+            observation : end_effector_pose (list 7), joint_state (list), rgb, depth, gripper_angle
             reward (float)
-            done (bool)
+            done (bool) : tell if pillow is at goal pose
             info (string)
         '''
-        go_to_pose(end_effector_pose[0],end_effector_pose[1],end_effector_pose[2],end_effector_pose[3],end_effector_pose[4],end_effector_pose[5],end_effector_pose[6])
-        gripper.grab_angle(gripper_angle)
+        self.go_to_pose(end_effector_pose[0],end_effector_pose[1],end_effector_pose[2],end_effector_pose[3],end_effector_pose[4],end_effector_pose[5],end_effector_pose[6])
+        self.gripper.grab_angle(gripper_angle)
 
-        return self.observation, self.reward, self.done, self.info
+        return self.get_obs(), self.reward, self.done, self.info
 
     def compute_reward(self):
         # possible neg reward if arm hit other object and + reward if get pillow to desire pose
+        if world.pillow_move() is True:
+            self.done = True
         pass
 
+    def get_obs(self):
+        return self.arm.get_end_effector_pose(), self.arm.joint_angle, self.arm.image, self.arm.depth, self.gripper.gripper_angle
+
+    
     def close(self):
         # close the terminal and everything after finish training
         pass
@@ -69,20 +74,20 @@ class Arm:
         5 = joint_6
         6 = tool_joint // cannot be control here, just for connecting with tools
         '''
+        self.image = None
+        self.depth = None
+        self.joint_angle = None
+        self.command = niryo_moveit_commander.MoveGroupPythonInteface("arm")
+        
         # rospy.init_node('Niryo_State', anonymous=True)
         rospy.loginfo("Initializing State Subscriber")
         
         rospy.Subscriber('/joint_states', JointState, self.joint_cb)
-        rospy.Subscriber('/')
+        # rospy.Subscriber('/')
         rospy.Subscriber('/camera/color/image_raw', Image, self.image_cb)
         rospy.Subscriber('/camera/depth/image_raw', Image, self.depth_cb)
+        rospy.sleep(1)
 
-        #need to get pillow state from Gazebo (only for simulation, for real robot would be image processing)
-
-        self.image = None
-        self.depth = None
-        self.joint_angle = None
-    
     def get_state_callback(self, data):
         self.joint_angle
 
@@ -94,6 +99,9 @@ class Arm:
 
     def joint_cb(self, msg):
         self.joint_angle = msg
+
+    def get_end_effector_pose(self):
+        return self.command.get_pose()
         
 class Gripper:
     
@@ -109,20 +117,31 @@ class Gripper:
         7 = right_clamp_joint
         8 = right_rod_joint
         '''
+        self.gripper_angle = 0
         self.gripper_pub = rospy.Publisher('/gripper_controller/gripper_cmd/goal', GripperCommandActionGoal, queue_size=10)
+        rospy.sleep(1)
 
     def grab_angle(self, angle): #angle max at 1.2
+        if angle > 1.2:
+            angle = 1.2
         gripperGoal = GripperCommandActionGoal()
         gripperGoal.goal.command.position = angle
         print(gripperGoal)
         rospy.sleep(1)
+        self.gripper_angle = angle
         self.gripper_pub.publish(gripperGoal)
         
 
 class World:
     def __init__(self):
+        rospy.sleep(1)
         self.pillow_z = self.get_height("Pillow")
 
+    def pillow_move(self):
+        if np.abs(self.get_height("Pillow") - self.pillow_z) > 0.01:
+            return True
+        return False
+    
     def reset(self):
         # remove bed and pillow and respawn them
         rospy.wait_for_service('/gazebo/reset_world')
@@ -135,40 +154,55 @@ class World:
     def get_model_state(self, model):
         rospy.wait_for_service('/gazebo/get_model_state')
         try:
-            self.get_model_state = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
+            get_state = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
         except rospy.ServiceException as e:
+            print("Error")
             print("Service call failed: %s"%e)
-        state = self.get_model_state(model,"")
+        state = get_state(model, '')
         # print(state)
         return state
 
     def get_height(self, model):
-        state = self.get_model_state("Pillow")
+        state = self.get_model_state(model)
         # print(state.pose.position.z)
         return state.pose.position.z
 
 def test_arm():
     # niryo = Niryo()
-    niryo.command.go_to_pose_goal(0.350840341432, -0.058138712168, 0.276432223498, 0.50174247142, 0.501506407284, 0.498433947182, 0.498306548344)
+    niryo.arm.command.go_to_pose_goal(0.350840341432, -0.058138712168, 0.276432223498, 0.50174247142, 0.501506407284, 0.498433947182, 0.498306548344)
+    print("Get Pose")
+    print(niryo.arm.get_end_effector_pose())
+    print('Reseting')
     niryo.reset_pose()
+    # print('going to final target')
+    # niryo.command.go_to_pose_goal(0.245375560498, 8.29996046947e-08, 0.417146039267, 0.500484688157, 0.500476344648, 0.499523261308, 0.499514781343)
 
 def test_gripper():
-    # niryo = Niryo()
     rospy.sleep(2)
     niryo.gripper.grab_angle(1.2)
     rospy.sleep(2)
     niryo.gripper.grab_angle(0.3)
 
 def test_world():
-    world = World()
-    world.reset()
+    print("Get model state")
+    print(niryo.world.get_model_state("Pillow"))
+    print("Get Height")
+    print(niryo.world.get_height("Pillow"))
+    niryo.world.reset()
+
+def test_Niryo():
+    print("Printing Observation")
+    print(niryo.get_obs())
+    # step()
 
 if __name__ == '__main__':
-    # niryo = Niryo()
-    # test_arm()
-    # test_gripper()
-    world = World()
-    # world.get_model_state("Pillow")
-    print(world.pillow_z)
-    # world.reset()
+    niryo = Niryo()
+    test_arm()
+    raw_input()
+    test_gripper()
+    raw_input()
+    test_world()
+    raw_input()
+    test_Niryo()
+    print("Done")
     
