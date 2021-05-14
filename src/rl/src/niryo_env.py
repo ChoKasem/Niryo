@@ -20,6 +20,7 @@ class Niryo:
         self.gripper = Gripper()
         self.world = World()
         self.done = False
+        self.info = None
     
     def go_to_pose(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
         self.arm.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
@@ -35,11 +36,11 @@ class Niryo:
         Step action which move the robot and gripper
 
         Args: 
-            end_effector_pose (list)
+            end_effector_pose (list[7])
             gripper_angle (float)
 
         Returns:
-            observation : end_effector_pose (list 7), joint_state (list), rgb, depth, gripper_angle
+            observation : end_effector_pose (list[7]), joint_state (list), rgb, depth, gripper_angle
             reward (float)
             done (bool) : tell if pillow is at goal pose
             info (string)
@@ -47,13 +48,13 @@ class Niryo:
         self.go_to_pose(end_effector_pose[0],end_effector_pose[1],end_effector_pose[2],end_effector_pose[3],end_effector_pose[4],end_effector_pose[5],end_effector_pose[6])
         self.gripper.grab_angle(gripper_angle)
 
-        return self.get_obs(), self.reward, self.done, self.info
+        return self.get_obs(), self.compute_reward(), self.done, self.info
 
     def compute_reward(self):
         # possible neg reward if arm hit other object and + reward if get pillow to desire pose
-        if world.pillow_move() is True:
+        if self.world.pillow_move() is True:
             self.done = True
-        pass
+        return 0
 
     def get_obs(self):
         return self.arm.get_end_effector_pose(), self.arm.joint_angle, self.arm.image, self.arm.depth, self.gripper.gripper_angle
@@ -191,9 +192,12 @@ def test_world():
     niryo.world.reset()
 
 def test_Niryo():
-    print("Printing Observation")
-    print(niryo.get_obs())
-    # step()
+    print('Test Step')
+    end_effector_pose = [0.350840341432, -0.058138712168, 0.276432223498, 0.50174247142, 0.501506407284, 0.498433947182, 0.498306548344]
+    gripper_angle = 0.6
+    print(niryo.step(end_effector_pose,gripper_angle))
+    # print("Printing Observation")
+    # print(niryo.get_obs())
 
 if __name__ == '__main__':
     niryo = Niryo()
