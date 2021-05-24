@@ -8,6 +8,9 @@ from control_msgs.msg import GripperCommandActionGoal
 from gazebo_msgs.srv import GetModelState
 from geometry_msgs.msg import *
 from std_srvs.srv import Empty
+import cv2
+import matplotlib.pyplot as plt
+from cv_bridge import CvBridge, CvBridgeError
 
 import niryo_moveit_commander
 
@@ -47,11 +50,20 @@ class Niryo:
         '''
         self.go_to_pose(end_effector_pose[0],end_effector_pose[1],end_effector_pose[2],end_effector_pose[3],end_effector_pose[4],end_effector_pose[5],end_effector_pose[6])
         self.gripper.grab_angle(gripper_angle)
-
+        _, _ , img, depth, _ = self.get_obs()
+        # print(img.data)
+        print(img.shape)
+        cv2.imshow("image", img)
+        cv2.imshow("depth", depth)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        # plt.imshow(img.data)
+        
         return self.get_obs(), self.compute_reward(), self.done, self.info
 
     def compute_reward(self):
         # possible neg reward if arm hit other object and + reward if get pillow to desire pose
+        # include z orientation
         if self.world.pillow_move() is True:
             return self.loss()
         
@@ -88,6 +100,7 @@ class Arm:
         self.image = None
         self.depth = None
         self.joint_angle = None
+        self.bridge = CvBridge()
         self.command = niryo_moveit_commander.MoveGroupPythonInteface("arm")
         
         # rospy.init_node('Niryo_State', anonymous=True)
@@ -103,10 +116,11 @@ class Arm:
         self.joint_angle
 
     def image_cb(self, msg):
-        self.image = msg
+        
+        self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
     
     def depth_cb(self, msg):
-        self.depth = msg
+        self.depth = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
 
     def joint_cb(self, msg):
         self.joint_angle = msg
@@ -218,18 +232,18 @@ def test_Niryo():
     print('Test Step')
     end_effector_pose = [0.350840341432, -0.058138712168, 0.276432223498, 0.50174247142, 0.501506407284, 0.498433947182, 0.498306548344]
     gripper_angle = 0.6
-    print(niryo.step(end_effector_pose,gripper_angle))
+    niryo.step(end_effector_pose,gripper_angle)
     # print("Printing Observation")
     # print(niryo.get_obs())
 
 if __name__ == '__main__':
     niryo = Niryo()
-    test_arm()
-    raw_input()
-    test_gripper()
-    raw_input()
-    test_world()
-    raw_input()
+    # test_arm()
+    # raw_input()
+    # test_gripper()
+    # raw_input()
+    # test_world()
+    # raw_input()
     test_Niryo()
     print("Done")
     
