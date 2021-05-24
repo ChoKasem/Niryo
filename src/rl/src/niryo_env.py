@@ -53,8 +53,18 @@ class Niryo:
     def compute_reward(self):
         # possible neg reward if arm hit other object and + reward if get pillow to desire pose
         if self.world.pillow_move() is True:
-            self.done = True
+            return self.loss()
+        
         return 0
+
+    def loss(self):
+        desire = self.world.pillow_desire_pose
+        current = self.world.pillow_pose
+        dist = np.sqrt((desire[0] - current.pose.position.x) ** 2 + (desire[1] - current.pose.position.y) ** 2 + (desire[2] - current.pose.position.z) ** 2)
+        L = 100
+        reward = L / (1 + np.exp(dist)) 
+        return reward
+         
 
     def get_obs(self):
         return self.arm.get_end_effector_pose(), self.arm.joint_angle, self.arm.image, self.arm.depth, self.gripper.gripper_angle
@@ -136,9 +146,22 @@ class Gripper:
 class World:
     def __init__(self):
         rospy.sleep(1)
-        self.pillow_z = self.get_height("Pillow")
+        # self.pillow_z = self.get_height("Pillow")
+        self.pillow_desire_pose = [0.4001509859, 0.249076249827, 0.149965204174, -0.000692504034247, 0.00251693882414, 0.999993530658, 0.00247469165438]
+        self.pillow_pose = self.get_model_state("Pillow")
 
     def pillow_move(self):
+        # if pillow doesn't move, return 0
+        # if pillow move, calculate reward
+        new_pose = self.get_model_state("Pillow")
+        if new_pose == self.pillow_pose:
+            return False
+
+        else:
+            self.pillow_pose = new_pose
+            return True
+
+    def pillow_move_up(self):
         if np.abs(self.get_height("Pillow") - self.pillow_z) > 0.01:
             return True
         return False
