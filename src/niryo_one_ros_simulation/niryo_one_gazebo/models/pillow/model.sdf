@@ -7,87 +7,19 @@
       <collision name="body">
         <pose>0 0 0 0 0 0</pose>
         <geometry>
-          <box>
-            <size>0.2 0.15 0.04</size>
-          </box>
+          <mesh>
+            <uri>model://pillow/meshes/pillow.stl</uri>
+            <scale> 0.1 0.1 0.1</scale>
+          </mesh>
         </geometry>
       </collision>
       <visual name="body">
         <pose>0 0 0 0 0 0</pose>
         <geometry>
-          <box>
-            <size>0.2 0.15 0.04</size>
-          </box>
-        </geometry>
-      </visual>
-
-
-      <!-- Leg -->
-      <collision name="front_left_leg">
-        <pose>0.06 0.065 -0.02 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.01 0.01 0.01</size>
-          </box>
-        </geometry>
-      </collision>
-      <visual name="front_left_leg">
-        <pose>0.06 0.065 -0.02 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.01 0.01 0.01</size>
-          </box>
-        </geometry>
-      </visual>
-
-      <collision name="front_right_leg">
-        <pose>0.06 -0.065 -0.02 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.01 0.01 0.01</size>
-          </box>
-        </geometry>
-      </collision>
-      <visual name="front_right_leg">
-        <pose>0.06 -0.065 -0.02 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.01 0.01 0.01</size>
-          </box>
-        </geometry>
-      </visual>
-
-      <collision name="back_left_leg">
-        <pose>-0.06 0.065 -0.02 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.01 0.01 0.01</size>
-          </box>
-        </geometry>
-      </collision>
-      <visual name="back_left_leg">
-        <pose>-0.06 0.065 -0.02 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.01 0.01 0.01</size>
-          </box>
-        </geometry>
-      </visual>
-
-      <collision name="back_right_leg">
-        <pose>-0.06 -0.065 -0.02 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.01 0.01 0.01</size>
-          </box>
-        </geometry>
-      </collision>
-      <visual name="back_right_leg">
-        <pose>-0.06 -0.065 -0.02 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.01 0.01 0.01</size>
-          </box>
+          <mesh>
+            <uri>model://pillow/meshes/pillow.stl</uri>
+            <scale> 0.1 0.1 0.1</scale>
+          </mesh>
         </geometry>
       </visual>
 
