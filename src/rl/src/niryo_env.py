@@ -11,6 +11,7 @@ from std_srvs.srv import Empty
 import cv2
 import matplotlib.pyplot as plt
 from cv_bridge import CvBridge, CvBridgeError
+from rl_base import State
 
 import niryo_moveit_commander
 

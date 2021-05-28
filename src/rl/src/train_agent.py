@@ -1,6 +1,7 @@
 from rl import PPO
 from rl_base import get_sample_state, Memory
 from agent import ActorCritic
+from niryo_env import Niryo
 
 NUM_OUTPUTS = 6+1
 
@@ -63,8 +64,6 @@ def sample_ppo_update():
                 break
 
 def sample_forward_pass(img_width, img_height):
-    from niryo_env import Env # TODO: Edit this
-
     # Initializing the Actor Critic
     img_wh = [512, 512]
     agent = ActorCritic(
@@ -76,12 +75,12 @@ def sample_forward_pass(img_width, img_height):
     )
     
     # Initialize environment
-    env = Env() # TODO: Edit this
+    env = Niryo()
 
     # Step
     sample_action = None # TODO: Edit this
     state = env.reset()
-    state, reward, done, info = env.step(sample_action)
+    state, reward, done, info = env.step(sample_action) # TODO: Edit this (currently step accepts two variables)
 
     # Forward pass
     action_dist, value = agent(state.to_tensor())
@@ -93,7 +92,8 @@ def sample_forward_pass(img_width, img_height):
 - What if multiple pillow in image
 """
 if __name__ == '__main__':
-    sample_ppo_update()
+    # sample_ppo_update()
+    sample_forward_pass() # TODO: Insert image dimensions
 
 
 
