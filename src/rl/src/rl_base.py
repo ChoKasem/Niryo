@@ -6,7 +6,7 @@ class State:
         self.rgb = rgb 
         self.depth = depth
         self.joint = joint
-        self.pillow = pillow
+        # self.pillow = pillow
     
     def to_tensor(self):
         # Load into tensors

@@ -12,6 +12,8 @@ import cv2
 import matplotlib.pyplot as plt
 from cv_bridge import CvBridge, CvBridgeError
 from rl_base import State
+import tf
+
 
 import niryo_moveit_commander
 
@@ -20,6 +22,7 @@ class Niryo:
         rospy.loginfo("Initialize Niryo RL Node")
         rospy.init_node('Niryo_RL_Node',
                     anonymous=True)
+        self.state = State(None,None,None,None)
         self.arm = Arm()            
         self.gripper = Gripper()
         self.world = World()
@@ -29,6 +32,40 @@ class Niryo:
     def go_to_pose(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
         self.arm.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
     
+    def one_hot_step(self, one_hot_input):
+        """
+        Pass One Hot version to go to pose
+        which will be add delta to it if it's 1 or deduct by delta if -1
+        Note: Angle are in radians
+
+        Args:
+            list of one_hot of length 7
+            [x, y, z, row, pitch, yaw, gripper_angle]
+
+        return None
+        """
+        delta = 0.1
+        pose = self.arm.get_end_effector_pose()
+        # print(pose)
+        euler = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.y])
+        # print(euler)
+        # print(euler[0] + delta * one_hot_input[3], euler[1] + delta * one_hot_input[4], euler[2] + delta * one_hot_input[5])
+        q = tf.transformations.quaternion_from_euler(euler[0] + delta * one_hot_input[3], euler[1] + delta * one_hot_input[4], euler[2] + delta * one_hot_input[5])
+        # print(q)
+        pose.position.x += delta * one_hot_input[0]
+        pose.position.y += delta * one_hot_input[1]
+        pose.position.z += delta * one_hot_input[2]
+        pose.orientation.x = q[0]
+        pose.orientation.y = q[1]
+        pose.orientation.z = q[2]
+        pose.orientation.w = q[3]
+
+        self.go_to_pose(pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
+        self.gripper.grab_angle(self.gripper.gripper_angle + delta * one_hot_input[6])
+
+
+        return self.get_obs(), self.compute_reward(), self.done, self.info
+
     def reset_pose(self):
         # starting joint state
         joints = [-4.00038318737e-05, -0.00169649498877, -0.00135103272703, 1.82992589703e-05, -0.0005746965517, 7.78535278902e-05]
@@ -51,11 +88,11 @@ class Niryo:
         '''
         self.go_to_pose(end_effector_pose[0],end_effector_pose[1],end_effector_pose[2],end_effector_pose[3],end_effector_pose[4],end_effector_pose[5],end_effector_pose[6])
         self.gripper.grab_angle(gripper_angle)
-        _, _ , img, depth, _ = self.get_obs()
-        # print(img.data)
-        print(img.shape)
-        cv2.imshow("image", img)
-        cv2.imshow("depth", depth)
+        self.get_obs()
+        print(self.state.rgb.shape)
+        print(self.state.depth.shape)
+        cv2.imshow("image", self.state.rgb)
+        cv2.imshow("depth", self.state.depth)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
         # plt.imshow(img.data)
@@ -80,7 +117,10 @@ class Niryo:
          
 
     def get_obs(self):
-        return self.arm.get_end_effector_pose(), self.arm.joint_angle, self.arm.image, self.arm.depth, self.gripper.gripper_angle
+        self.state.rgb = self.arm.image
+        self.state.depth = self.arm.depth
+        self.state.joint = self.arm.joint_angle
+        return self.state
 
     
     def close(self):
@@ -231,11 +271,14 @@ def test_world():
 
 def test_Niryo():
     print('Test Step')
-    end_effector_pose = [0.350840341432, -0.058138712168, 0.276432223498, 0.50174247142, 0.501506407284, 0.498433947182, 0.498306548344]
-    gripper_angle = 0.6
-    niryo.step(end_effector_pose,gripper_angle)
+    # end_effector_pose = [0.350840341432, -0.058138712168, 0.276432223498, 0.50174247142, 0.501506407284, 0.498433947182, 0.498306548344]
+    #gripper_angle = 0.6
+    # niryo.step(end_effector_pose,gripper_angle)
     # print("Printing Observation")
     # print(niryo.get_obs())
+    one_input = [1,1,1,1,1,1,0]
+    niryo.one_hot_step(one_input)
+
 
 if __name__ == '__main__':
     niryo = Niryo()
@@ -246,5 +289,5 @@ if __name__ == '__main__':
     # test_world()
     # raw_input()
     test_Niryo()
-    print("Done")
+    print("Main Done")
     
