@@ -75,7 +75,7 @@ class ActorCritic(nn.Module):
                 Height, width, and number of channels much match the input
                 shape given in the initialization of the neural net
             depth (tensor): Batched ??? How many dims?
-            joint (tensor): Batched 6D tensor containing joint angles
+            joint (tensor): Batched _D tensor containing joint angles
             pillow (tensor): Batched _D tensor containing pillow pose
 
         Returns:

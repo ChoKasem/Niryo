@@ -6,7 +6,7 @@ class State:
         self.rgb = rgb 
         self.depth = depth
         self.joint = joint
-        # self.pillow = pillow
+        self.pillow = pillow
     
     def to_tensor(self):
         # Load into tensors
@@ -50,11 +50,11 @@ class Memory:
         del self.rewards[:]
         del self.is_terminals[:]
 
-def get_sample_state(img_width, img_height):
+def get_sample_state(img_width, img_height, num_joints):
     # Use some sample values
     rgb_img = np.random.uniform(0, 255, (img_width, img_height, 3))
     depth_img = np.random.uniform(0, 1, (img_width, img_height, 1))
-    joint_angles = np.random.uniform(0, np.pi, (6))
+    joint_angles = np.random.uniform(0, np.pi, (num_joints))
     pillow_pose = np.random.uniform(0, 100, (3))
 
     return State(rgb_img, depth_img, joint_angles, pillow_pose)

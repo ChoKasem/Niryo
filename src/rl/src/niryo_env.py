@@ -18,6 +18,10 @@ import tf
 import niryo_moveit_commander
 
 class Niryo:
+
+    action_dim = 7
+    num_joints = 12
+
     def __init__(self):
         rospy.loginfo("Initialize Niryo RL Node")
         rospy.init_node('Niryo_RL_Node',
@@ -71,6 +75,7 @@ class Niryo:
         joints = [-4.00038318737e-05, -0.00169649498877, -0.00135103272703, 1.82992589703e-05, -0.0005746965517, 7.78535278902e-05]
         self.arm.command.go_to_joint_state(joints)
         self.gripper.grab_angle(0)
+        return self.get_obs()
 
     def step(self, end_effector_pose, gripper_angle):
         '''
@@ -88,15 +93,7 @@ class Niryo:
         '''
         self.go_to_pose(end_effector_pose[0],end_effector_pose[1],end_effector_pose[2],end_effector_pose[3],end_effector_pose[4],end_effector_pose[5],end_effector_pose[6])
         self.gripper.grab_angle(gripper_angle)
-        self.get_obs()
-        print(self.state.rgb.shape)
-        print(self.state.depth.shape)
-        cv2.imshow("image", self.state.rgb)
-        cv2.imshow("depth", self.state.depth)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        # plt.imshow(img.data)
-        
+        self.get_obs()        
         return self.get_obs(), self.compute_reward(), self.done, self.info
 
     def compute_reward(self):
@@ -118,8 +115,8 @@ class Niryo:
 
     def get_obs(self):
         self.state.rgb = self.arm.image
-        self.state.depth = self.arm.depth
-        self.state.joint = self.arm.joint_angle
+        self.state.depth = self.arm.depth[..., np.newaxis] # (480,640)->(480,640,1) 
+        self.state.joint = np.array(self.arm.joint_angle.position)
         return self.state
 
     
@@ -276,7 +273,7 @@ def test_Niryo():
     # niryo.step(end_effector_pose,gripper_angle)
     # print("Printing Observation")
     # print(niryo.get_obs())
-    one_input = [1,1,1,1,1,1,0]
+    one_input = [0,0,-1,0,0,0,0]
     niryo.one_hot_step(one_input)
 
 

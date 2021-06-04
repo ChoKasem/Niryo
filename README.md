@@ -15,3 +15,15 @@ pip install torch
 
 pip install future
 ```
+
+Run ```sudo apt-get install ros-kinetic-{}``` for the following:
+
+```
+moveit*
+rviz*
+joint*
+ros-control*
+control*
+trajectory*
+gazebo*
+```
