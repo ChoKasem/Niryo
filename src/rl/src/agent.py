@@ -12,6 +12,32 @@ import torch.nn as nn
 
 from agent_helpers import init_weights, get_cu_OS, ConvUnit, ConvUnitPars
 
+def get_step_vector_from_action(action):
+    """To make it compatible with the Niryo.step function, this additional step is needed
+
+    Args:
+        action (int): Action number ranging from 0 to 5 inclusive.
+            The number corresponds to a certain direction: [+x, -x, +y, -y, +z, -z]
+
+    Returns:
+        list[int]: 7-vector that can be used by the Niryo to perform a step
+            The vector is of the form: [x, y, z, row, pitch, yaw, gripper_angle]
+    """
+    action_to_step = {
+        0: [1, 0, 0, 0, 0, 0, 0],
+        1: [-1, 0, 0, 0, 0, 0, 0],
+        2: [0, 1, 0, 0, 0, 0, 0],
+        3: [0, -1, 0, 0, 0, 0, 0],
+        4: [0, 0, 1, 0, 0, 0, 0],
+        5: [0, 0, -1, 0, 0, 0, 0],
+    }
+    try:
+        return action_to_step[action]
+    except KeyError:
+        print("MAKE SURE ACTION FED INTO get_step_vector_from_action IS AN INT")
+        print("Currently, it's {}".format(type(action)))
+        raise
+
 class ActorCritic(nn.Module):
     """Details
     State: RGB Image + Depth Image + Joint Angles + Pillow Pose

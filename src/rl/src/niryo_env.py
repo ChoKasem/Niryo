@@ -21,6 +21,8 @@ class Niryo:
 
     action_dim = 7
     num_joints = 12
+    rgb_img_shape = (480, 640, 3)
+    depth_img_shape = (480, 640, 1)
 
     def __init__(self):
         rospy.loginfo("Initialize Niryo RL Node")
@@ -36,14 +38,14 @@ class Niryo:
     def go_to_pose(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
         self.arm.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
     
-    def one_hot_step(self, one_hot_input):
+    def step(self, step_vector):
         """
-        Pass One Hot version to go to pose
-        which will be add delta to it if it's 1 or deduct by delta if -1
+        Pass a [x, y, z, row, pitch, yaw, gripper_angle] vector to go to pose
+        which will be add delta to it if it's positive or deduct by delta if negative
         Note: Angle are in radians
 
         Args:
-            list of one_hot of length 7
+            list of length 7
             [x, y, z, row, pitch, yaw, gripper_angle]
 
         return None
@@ -54,18 +56,18 @@ class Niryo:
         euler = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.y])
         # print(euler)
         # print(euler[0] + delta * one_hot_input[3], euler[1] + delta * one_hot_input[4], euler[2] + delta * one_hot_input[5])
-        q = tf.transformations.quaternion_from_euler(euler[0] + delta * one_hot_input[3], euler[1] + delta * one_hot_input[4], euler[2] + delta * one_hot_input[5])
+        q = tf.transformations.quaternion_from_euler(euler[0] + delta * step_vector[3], euler[1] + delta * step_vector[4], euler[2] + delta * step_vector[5])
         # print(q)
-        pose.position.x += delta * one_hot_input[0]
-        pose.position.y += delta * one_hot_input[1]
-        pose.position.z += delta * one_hot_input[2]
+        pose.position.x += delta * step_vector[0]
+        pose.position.y += delta * step_vector[1]
+        pose.position.z += delta * step_vector[2]
         pose.orientation.x = q[0]
         pose.orientation.y = q[1]
         pose.orientation.z = q[2]
         pose.orientation.w = q[3]
 
         self.go_to_pose(pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
-        self.gripper.grab_angle(self.gripper.gripper_angle + delta * one_hot_input[6])
+        self.gripper.grab_angle(self.gripper.gripper_angle + delta * step_vector[6])
 
 
         return self.get_obs(), self.compute_reward(), self.done, self.info
@@ -77,7 +79,7 @@ class Niryo:
         self.gripper.grab_angle(0)
         return self.get_obs()
 
-    def step(self, end_effector_pose, gripper_angle):
+    def move(self, end_effector_pose, gripper_angle):
         '''
         Step action which move the robot and gripper
 
@@ -270,11 +272,11 @@ def test_Niryo():
     print('Test Step')
     # end_effector_pose = [0.350840341432, -0.058138712168, 0.276432223498, 0.50174247142, 0.501506407284, 0.498433947182, 0.498306548344]
     #gripper_angle = 0.6
-    # niryo.step(end_effector_pose,gripper_angle)
+    # niryo.move(end_effector_pose,gripper_angle)
     # print("Printing Observation")
     # print(niryo.get_obs())
     one_input = [0,0,-1,0,0,0,0]
-    niryo.one_hot_step(one_input)
+    niryo.step(one_input)
 
 
 if __name__ == '__main__':
