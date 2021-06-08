@@ -3,7 +3,7 @@ import cv2
 
 from rl import PPO
 from rl_base import get_sample_state, Memory
-from agent import ActorCritic
+from agent import ActorCritic, get_step_vector_from_action
 from niryo_env import Niryo
 
 NUM_OUTPUTS = Niryo.action_dim
@@ -70,23 +70,37 @@ def sample_ppo_update():
     print("Depth Info", state.depth.shape, np.mean(state.depth))
     print("Joint Info", state.joint.shape)
 
-def sample_forward_pass(img_width, img_height):
+def sample_forward_pass():
     # Initialize environment
     env = Niryo()
 
     # Initializing the Actor Critic
     agent = ActorCritic(
-        rgb_img_shape=(img_width, img_height, 3),
-        depth_img_shape=(img_width, img_height, 1),
+        rgb_img_shape=env.rgb_img_shape,
+        depth_img_shape=env.depth_img_shape,
         num_joints=env.num_joints,
         pillow_pose_size=3,
-        num_outputs=env.action_dim
+        num_outputs=6
     )
 
-    # Step
-    sample_action =  [0,0,-1,0,0,0,0]
+    # Reset environment
     state = env.reset_pose()
-    state, reward, done, info = env.one_hot_step(sample_action)
+
+    # TODO: Depth image is currently lots of NaNs
+    # Add a dummy depth image for now
+    state.depth = np.random.uniform(0, 1, env.depth_img_shape)
+
+    # Add a dummy pillow pose
+    state.pillow = np.random.uniform(0, 100, (3))
+
+    # Forward pass
+    action_dist, value = agent(state.to_tensor())
+    print ("Action Dist:", action_dist, value)
+    action = action_dist.sample()
+    print("Action:", action)
+    step_vector = get_step_vector_from_action(action.numpy()[0])
+    print("Action used by env:", step_vector)
+    state, reward, done, info = env.step(step_vector)
 
     # cv2.imshow("image", state.rgb)
     # cv2.imshow("depth", state.depth)
@@ -95,22 +109,6 @@ def sample_forward_pass(img_width, img_height):
     print("RGB Info", state.rgb.shape, np.mean(state.rgb))
     print("Depth Info", state.depth.shape, np.mean(state.depth))
     print("Joint Info", state.joint.shape)
-
-    # TODO: Depth image is currently lots of NaNs
-    # Add a dummy depth image for now
-    state.depth = np.random.uniform(0, 1, (img_width, img_height, 1))
-
-    # Add a dummy pillow pose
-    state.pillow = np.random.uniform(0, 100, (3))
-
-    # TODO: Have to convert from action to one-hot
-    # TODO: Current setup (i.e. agent+env) doesn't allow for negatives in the one-hot
-    # Forward pass
-    action_dist, value = agent(state.to_tensor())
-    print (action_dist, value)
-    print(action_dist.sample())
-    
-    
     
 
 """TODO: 
@@ -118,7 +116,7 @@ def sample_forward_pass(img_width, img_height):
 """
 if __name__ == '__main__':
     # sample_ppo_update()
-    sample_forward_pass(480, 640)
+    sample_forward_pass()
 
 
 # Pseudocode for usage
