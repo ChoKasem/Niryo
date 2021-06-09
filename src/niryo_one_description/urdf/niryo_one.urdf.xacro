@@ -597,8 +597,8 @@
                     <format>R8G8B8</format>
                 </image>
                 <clip>
-                    <near>0.05</near>
-                    <far>3</far>
+                    <near>0.0001</near>
+                    <far>300</far>
                 </clip>
             </camera>
             <plugin name="depth_controller" filename="libgazebo_ros_openni_kinect.so">

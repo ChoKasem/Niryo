@@ -287,6 +287,7 @@ if __name__ == '__main__':
     # raw_input()
     # test_world()
     # raw_input()
-    test_Niryo()
+    # test_Niryo()
+    print(niryo.arm.image)
     print("Main Done")
     
