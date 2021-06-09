@@ -137,7 +137,11 @@ def train_RJ():
     # Train
     time_step = 0 # This value may overlap multiple episodes
     for i_episode in range(1, n_episodes+1):
+        print("Episode {}".format(i_episode))
         state = env.reset_pose()
+        state.depth = np.random.uniform(0, 1, env.depth_img_shape) #  dummy values
+        state.pillow = np.random.uniform(0, 100, (3)) #  dummy values
+
         for t in range(max_timesteps):
             time_step += 1
 
@@ -146,6 +150,10 @@ def train_RJ():
             action = action_dist.sample()
             step_vector = get_step_vector_from_action(action.numpy()[0])
             state, reward, done, info = env.step(step_vector)
+
+            # Add dummy values to deal with extra fields (not used by agent or training)
+            state.depth = np.random.uniform(0, 1, env.depth_img_shape)
+            state.pillow = np.random.uniform(0, 100, (3))
 
             # Saving the transition
             memory.states.append(state)
