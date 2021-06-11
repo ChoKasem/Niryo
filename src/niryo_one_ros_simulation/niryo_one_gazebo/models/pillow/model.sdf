@@ -22,7 +22,6 @@
           </mesh>
         </geometry>
       </visual>
-
     </link>
   </model>
 </sdf>
