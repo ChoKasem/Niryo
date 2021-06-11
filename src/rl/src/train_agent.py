@@ -111,7 +111,7 @@ def sample_forward_pass():
     print("Joint Info", state.joint.shape)
     
 
-def train_RJ():
+def train_RJ(is_perform_update=True):
     # Initialize environment
     env = Niryo()
 
@@ -131,7 +131,7 @@ def train_RJ():
     ppo = PPO(agent, agent_old, buffer_size=1, mini_batch_size=1)
     memory = Memory()
     n_episodes = 10 # Number of times agent tries performing the task
-    max_timesteps = 50 # Max number of timesteps per try
+    max_timesteps = 20 # Max number of timesteps per try
     update_timestep = 3 # Perform agent update after a certain # of timesteps
 
     # Train
@@ -150,6 +150,9 @@ def train_RJ():
             action = action_dist.sample()
             step_vector = get_step_vector_from_action(action.numpy()[0])
             state, reward, done, info = env.step(step_vector)
+            print("Step {}, Reward ({}), Action ({}), Done ({})".format(
+                t + 1, reward, step_vector, done
+            ))
 
             # Add dummy values to deal with extra fields (not used by agent or training)
             state.depth = np.random.uniform(0, 1, env.depth_img_shape)
@@ -164,21 +167,25 @@ def train_RJ():
 
             # update if its time
             if time_step % update_timestep == 0:
-                print("Performing update")
-                ppo.update(memory)
+                if is_perform_update:
+                    print("Performing update")
+                    ppo.update(memory)
                 memory.clear_memory()
                 time_step = 0
 
             if done:
                 break
+    print("End of training")
 
 """TODO: 
 - What if multiple pillow in image
+- Done state
+- Consider shrinking image in the agent
 """
 if __name__ == '__main__':
     # sample_ppo_update()
     # sample_forward_pass()
-    train_RJ()
+    train_RJ(is_perform_update=False)
 
 
 # Pseudocode for usage

@@ -50,7 +50,7 @@ class Niryo:
 
         return None
         """
-        delta = 0.1
+        delta = 0.05
         pose = self.arm.get_end_effector_pose()
         # print(pose)
         euler = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.y])
