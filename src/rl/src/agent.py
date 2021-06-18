@@ -38,10 +38,134 @@ def get_step_vector_from_action(action):
         print("Currently, it's {}".format(type(action)))
         raise
 
-class ActorCritic(nn.Module):
+class ActorCriticRJ(nn.Module):
+    """Details
+    State: RGB Image + Joint Angles
+    Output: Action distribution
+    """
+
+    def __init__(self, rgb_img_shape, num_joints, num_outputs):
+        """Initializing the Actor Critic neural networks.
+        Two neural nets: 1. Actor, 2. Critic, both of which have
+        same architecture. Each neural net has a portion for each state
+        component as well as a portion for combining them all.
+        ^The portions make up a full neural network.
+        """
+        assert len(rgb_img_shape) == 3
+        super(ActorCriticRJ, self).__init__()
+
+        self.rgb_img_shape = rgb_img_shape
+        self.num_joints = num_joints
+
+        self.rgb_OS = None
+        self.joint_OS = None
+        self.full_combine_OS = 32
+
+        self.actor_rgb = self.get_rgb_module()
+        self.actor_joint = self.get_joint_module()
+        self.actor_full_combine = self.get_full_combine_module()
+        self.actor_output = nn.Sequential(
+            nn.Linear(self.full_combine_OS, num_outputs),
+            nn.LogSoftmax(1)
+        )
+
+        self.critic_rgb = self.get_rgb_module()
+        self.critic_joint = self.get_joint_module()
+        self.critic_full_combine = self.get_full_combine_module()
+        self.critic_output = nn.Sequential(
+            nn.Linear(self.full_combine_OS, 1)
+        )
+        
+        self.apply(init_weights)
+
+    def forward(self, state):
+        """Performs forward pass for the two NNs.
+        Importantly, the input reshaping is done here.
+
+        Args for the state object:
+            rgb (tensor): Batched 3D image.
+                4D tensor (Batch Size, Height, Width, Number Channels)
+                Height, width, and number of channels much match the input
+                shape given in the initialization of the neural net
+            joint (tensor): Batched _D tensor containing joint angles
+
+        Returns:
+            (Categorical, tensor): Action distribution and the value of
+                the state
+        """
+        
+
+        # Image reshaping
+        try:
+            batch_size, length, width, num_channels = state.rgb.shape
+            rgb_reshape = state.rgb.view(batch_size, num_channels, length, width)
+        except:
+            print(state.rgb.shape)
+            raise
+
+        # Actor Forward Pass
+        rgb_portion = self.actor_rgb(rgb_reshape)
+        joint_portion = self.actor_joint(state.joint)
+        full_combo = self.actor_full_combine(
+            # Add to combine
+            rgb_portion + joint_portion
+        )
+        action_probs = self.actor_output(full_combo)
+        action_dist = Categorical(action_probs)
+
+        # Critic Forward Pass
+        rgb_portion = self.critic_rgb(rgb_reshape)
+        joint_portion = self.critic_joint(state.joint)
+        full_combo = self.critic_full_combine(
+            rgb_portion + joint_portion)
+        value = self.critic_output(full_combo)
+
+        # Returning action distribution and value
+        return action_dist, value
+
+    def get_rgb_module(self):
+        # RGB Image Module ----------------------------------------------------
+        rgb1_pars = ConvUnitPars(16, 3, 1, 2, 4, 2)
+        rgb2_pars = ConvUnitPars(16, 2, 1, 2, 4, 2)
+        print("---------------\nRGB layers output shapes")
+        rgb1_OS = get_cu_OS(self.rgb_img_shape, rgb1_pars)
+        rgb2_OS = get_cu_OS(rgb1_OS, rgb2_pars)
+        self.rgb_OS = np.prod(rgb2_OS)
+        print(self.rgb_img_shape, rgb1_OS, self.rgb_OS)
+        print("---------------")
+        return nn.Sequential(
+            ConvUnit(
+                self.rgb_img_shape,
+                rgb1_pars,
+            ),
+            ConvUnit(
+                rgb1_OS,
+                rgb2_pars,
+            ),
+            nn.Flatten()
+        )
+
+    def get_joint_module(self):
+        assert self.rgb_OS is not None, "RGB module not initiated yet"
+        # Joint Module --------------------------------------------------------
+        self.joint_OS = self.rgb_OS
+        return nn.Sequential(
+            nn.Linear(self.num_joints, 32),
+            nn.Linear(32, self.joint_OS),
+        )
+
+    def get_full_combine_module(self):
+        # Full Combination Module ----------------------------------------------
+        return nn.Sequential(
+            nn.Linear(self.rgb_OS, 64),
+            nn.Linear(64, self.full_combine_OS),
+        )
+
+
+class ActorCriticRDJP(nn.Module):
     """Details
     State: RGB Image + Depth Image + Joint Angles + Pillow Pose
-    Output: Joint Angles
+    Output: Action distribution
     """
 
     def __init__(self, rgb_img_shape, depth_img_shape, num_joints, pillow_pose_size, num_outputs):
@@ -52,7 +176,7 @@ class ActorCritic(nn.Module):
         ^The portions make up a full neural network.
         """
         assert len(rgb_img_shape) == 3 and len(depth_img_shape) == 3
-        super(ActorCritic, self).__init__()
+        super(ActorCriticRDJP, self).__init__()
 
         self.rgb_img_shape = rgb_img_shape
         self.depth_img_shape = depth_img_shape
@@ -108,6 +232,8 @@ class ActorCritic(nn.Module):
             (Categorical, tensor): Action distribution and the value of
                 the state
         """
+        assert state.joint.shape == torch.Size([self.num_joints])
+
         # Image reshaping
         try:
             batch_size, length, width, num_channels = state.rgb.shape
@@ -245,7 +371,7 @@ class ActorCritic(nn.Module):
 
     def get_pillow_joint_combine_module(self):
         assert self.pillow_OS is not None, "Pillow module not initiated yet"
-        assert self.joint_OS is not None, "RGB module not initiated yet"
+        assert self.joint_OS is not None, "Joint module not initiated yet"
         assert self.img_combine_OS is not None, "Img Combine module not initiated yet"
         # Pillow + Joint Combination Module ---------------------------------
         return nn.Sequential(
@@ -266,16 +392,31 @@ if __name__ == "__main__":
 
     # Initializing the Actor Critic
     img_wh = [512, 512]
-    AC = ActorCritic(
+    AC = ActorCriticRDJP(
         rgb_img_shape=(img_wh[0], img_wh[1], 3),
         depth_img_shape=(img_wh[0], img_wh[1], 1),
-        num_joints=6,
+        num_joints=12,
         pillow_pose_size=3,
         num_outputs=6
     )
 
     # Run a forward pass
-    state = get_sample_state(img_wh[0], img_wh[1])
+    state = get_sample_state(img_wh[0], img_wh[1], 12)
+    action_dist, value = AC(state.to_tensor())
+
+    print(action_dist)
+    print(value)
+
+    # # Initializing the smaller Actor Critic
+    img_wh = [480, 640]
+    AC = ActorCriticRJ(
+        rgb_img_shape=(img_wh[0], img_wh[1], 3),
+        num_joints=12,
+        num_outputs=6
+    )
+
+    # Run a forward pass
+    state = get_sample_state(img_wh[0], img_wh[1], 12)
     action_dist, value = AC(state.to_tensor())
 
     print(action_dist)

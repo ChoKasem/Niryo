@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# TODO: Add where code is from
 
 import sys
 import copy
@@ -145,7 +146,7 @@ class MoveGroupPythonInteface(object):
     group = self.group
     return self.group.get_current_pose().pose
 
-  def go_to_joint_state(self, joint_goal):
+  def go_to_joint_state(self, joint_goal, verbose=False):
     # Copy class variables to local variables to make the web tutorials more clear.
     # In practice, you should use the class variables directly unless you have a good
     # reason not to.
@@ -166,8 +167,9 @@ class MoveGroupPythonInteface(object):
     # joint_goal[3] = joint3
     # joint_goal[4] = joint4
     # joint_goal[5] = joint5
-    print("Joint Goal")
-    print(joint_goal)
+    if verbose:
+      print("Joint Goal")
+      print(joint_goal)
 
     # The go command can be called with joint values, poses, or without any
     # parameters if you have already set the pose or joint target for the group
