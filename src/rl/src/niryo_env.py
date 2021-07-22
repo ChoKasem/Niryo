@@ -5,7 +5,7 @@ import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState, Image
 from control_msgs.msg import GripperCommandActionGoal
-from gazebo_msgs.srv import GetModelState
+from gazebo_msgs.srv import GetModelState, SpawnModel
 from geometry_msgs.msg import *
 from std_srvs.srv import Empty
 import cv2
@@ -154,14 +154,14 @@ class Niryo:
         1) dist_penalty : penalize distance proportion to distance between goal and pillow
         TODO: penalized for how off the orientation of pillow is to goal oritation
         TODO: penalized for getting to deep into the bed (or don't touch bed at all, terminate if it does) or if hit bedframe
-        TODO: give high reward for placing pillow in correct pose and orientation witin threshold
+        TODO: ?maybe give high reward for placing pillow in correct pose and orientation witin threshold
         '''
         def dist_penalty():
             goal = self.world.pillow_goal_pose
             current = self.world.pillow_pose
             dist = np.sqrt((goal[0] - current.pose.position.x) ** 2 + (goal[1] - current.pose.position.y) ** 2 + (goal[2] - current.pose.position.z) ** 2)
             if self.reward_type == 'sparse':
-                return -(dist > self.distance_threshold)
+                return -(dist > self.distance_threshold).astype(np.float32)
             else:
                 return -dist
             
@@ -256,6 +256,9 @@ class World:
         self.pillow_goal_pose = [0.4001509859, 0.249076249827, 0.149965204174, -0.000692504034247, 0.00251693882414, 0.999993530658, 0.00247469165438]
         self.pillow_pose = self.get_model_state("Pillow")
 
+    def update_world_state(self):
+        self.pillow_pose = self.get_model_state("Pillow")
+
     def pillow_move(self):
         # if pillow doesn't move, return 0
         # if pillow move, calculate reward
@@ -296,6 +299,39 @@ class World:
         state = self.get_model_state(model)
         # print(state.pose.position.z)
         return state.pose.position.z
+
+    def spawn(self, model, x, y, z, row, pitch, yaw):
+        # TODO Spawn the goal block and pillow randomly?
+        '''
+        Spawn SDF Model
+
+        Args: 
+            model ('pillow' or 'goal'): model that want to spawn
+                pillow and goal locations are limit to x = [0.25 to 0.4] and y = [-0.15 to 0.2] to keep it within camera and arm workspace 
+            x, y, z row, pitch, yaw : coordinate and rotation with repect to the world coordinate
+            
+        Returns:
+            None
+        '''
+        if model.lower() == "pillow":
+            f = open('/home/joker/Niryo/src/niryo_one_ros_simulation/niryo_one_gazebo/models/pillow/model.sdf','r')
+        elif model.lower() == "goal":
+            pass
+        #if goal
+        initial_pose = Pose()
+        q = tf.transformations.quaternion_from_euler(row, pitch, yaw)
+        initial_pose.position.x = x
+        initial_pose.position.y = y
+        initial_pose.position.z = z
+        initial_pose.orientation.x = q[0]
+        initial_pose.orientation.y = q[1]
+        initial_pose.orientation.z = q[2]
+        initial_pose.orientation.w = q[3]
+        sdff = f.read()
+
+        rospy.wait_for_service('gazebo/spawn_sdf_model')
+        spawn_model_prox = rospy.ServiceProxy('gazebo/spawn_sdf_model', SpawnModel)
+        spawn_model_prox("pillow", sdff, "", initial_pose, "world")
 
 def test_arm():
     # niryo = Niryo()
@@ -345,6 +381,7 @@ if __name__ == '__main__':
     # test_Niryo()
     # print(niryo.arm.image)
     # print(niryo.get_obs())
-    test_reward()
+    # test_reward()
+    niryo.world.spawn("Pillow", 0.4, -0.15, .2, 0 ,0,0)
     print("Main Done")
     
