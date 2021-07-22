@@ -19,6 +19,20 @@ import niryo_moveit_commander
 
 class Niryo:
 
+    """
+    From openai gym, The main API methods that users of this class need to know are:
+        step
+        reset
+        render (ignore)
+        close
+        seed
+
+    And set the following attributes:
+        action_space: The Space object corresponding to valid actions
+        observation_space: The Space object corresponding to valid observations
+        reward_range: A tuple corresponding to the min and max possible rewards
+    """
+
     action_dim = 7
     num_joints = 12
     rgb_img_shape = (480, 640, 3)
@@ -34,9 +48,6 @@ class Niryo:
         self.world = World()
         self.done = False
         self.info = None
-    
-    def go_to_pose(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
-        self.arm.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
     
     def step(self, step_vector):
         """
@@ -72,6 +83,35 @@ class Niryo:
 
         return self.get_obs(), self.compute_reward(), self.done, self.info
 
+    def reset(self):
+        """Resets the environment to an initial state and returns an initial
+        observation. The robot will move to dafult position and gazebo world
+        is reset.
+
+        Note that this function should not reset the environment's random
+        number generator(s); random variables in the environment's state should
+        be sampled independently between multiple calls to `reset()`. In other
+        words, each call of `reset()` should yield an environment suitable for
+        a new episode, independent of previous episodes.
+        
+        Returns:
+            observation (object): the initial observation.
+        """
+        self.reset_pose()
+        self.world.reset()
+
+    def close(self):
+        """Override close in your subclass to perform any necessary cleanup.
+        Environments will automatically close() themselves when
+        garbage collected or when the program exits.
+
+        TODO: see how to close gazebo and moveit with python command
+        """
+        pass
+    
+    def go_to_pose(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
+        self.arm.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
+    
     def reset_pose(self):
         # starting joint state
         joints = [-4.00038318737e-05, -0.00169649498877, -0.00135103272703, 1.82992589703e-05, -0.0005746965517, 7.78535278902e-05]
@@ -102,17 +142,19 @@ class Niryo:
         # possible neg reward if arm hit other object and + reward if get pillow to desire pose
         # include z orientation
         if self.world.pillow_move() is True:
-            return self.loss()
+            return self.cartesian_reward()
         
         return 0
 
-    def loss(self):
+    def cartesian_reward(self):
         desire = self.world.pillow_desire_pose
         current = self.world.pillow_pose
-        dist = np.sqrt((desire[0] - current.pose.position.x) ** 2 + (desire[1] - current.pose.position.y) ** 2 + (desire[2] - current.pose.position.z) ** 2)
+        cartesian_dist = np.sqrt((desire[0] - current.pose.position.x) ** 2 + (desire[1] - current.pose.position.y) ** 2 + (desire[2] - current.pose.position.z) ** 2)
         L = 100
-        reward = L / (1 + np.exp(dist)) 
-        return reward
+        cartesian_r = L / (1 + np.exp(cartesian_dist)) 
+        return cartesian_r
+
+    # TODO: add another reward for not moving bed etc or pose
          
 
     def get_obs(self):
@@ -121,7 +163,7 @@ class Niryo:
         self.state.joint = np.array(self.arm.joint_angle.position)
         return self.state
 
-    
+
     def close(self):
         # close the terminal and everything after finish training
         pass
@@ -277,7 +319,6 @@ def test_Niryo():
     # print(niryo.get_obs())
     one_input = [0,0,-1,0,0,0,0]
     niryo.step(one_input)
-
 
 if __name__ == '__main__':
     niryo = Niryo()
