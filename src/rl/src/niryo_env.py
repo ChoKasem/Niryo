@@ -38,7 +38,14 @@ class Niryo:
     rgb_img_shape = (480, 640, 3)
     depth_img_shape = (480, 640, 1)
 
-    def __init__(self):
+    def __init__(self, reward_type = 'dense', distance_threshold = 0.05):
+
+        """Initializes a new Fetch environment.
+        Args:
+            distance_threshold (float): the threshold after which a goal is considered achieved
+            reward_type ('sparse' or 'dense'): the reward type, i.e. sparse or dense
+        """
+
         rospy.loginfo("Initialize Niryo RL Node")
         rospy.init_node('Niryo_RL_Node',
                     anonymous=True)
@@ -48,6 +55,9 @@ class Niryo:
         self.world = World()
         self.done = False
         self.info = None
+
+        self.reward_type = reward_type
+        self.distance_threshold = distance_threshold
     
     def step(self, step_vector):
         """
@@ -139,30 +149,31 @@ class Niryo:
         return self.get_obs(), self.compute_reward(), self.done, self.info
 
     def compute_reward(self):
-        # possible neg reward if arm hit other object and + reward if get pillow to desire pose
-        # include z orientation
-        if self.world.pillow_move() is True:
-            return self.cartesian_reward()
+        '''
+        Compute the Reward, composing of # terms
+        1) dist_penalty : penalize distance proportion to distance between goal and pillow
+        TODO: penalized for how off the orientation of pillow is to goal oritation
+        TODO: penalized for getting to deep into the bed (or don't touch bed at all, terminate if it does) or if hit bedframe
+        TODO: give high reward for placing pillow in correct pose and orientation witin threshold
+        '''
+        def dist_penalty():
+            goal = self.world.pillow_goal_pose
+            current = self.world.pillow_pose
+            dist = np.sqrt((goal[0] - current.pose.position.x) ** 2 + (goal[1] - current.pose.position.y) ** 2 + (goal[2] - current.pose.position.z) ** 2)
+            if self.reward_type == 'sparse':
+                return -(dist > self.distance_threshold)
+            else:
+                return -dist
+            
+
         
-        return 0
-
-    def cartesian_reward(self):
-        desire = self.world.pillow_desire_pose
-        current = self.world.pillow_pose
-        cartesian_dist = np.sqrt((desire[0] - current.pose.position.x) ** 2 + (desire[1] - current.pose.position.y) ** 2 + (desire[2] - current.pose.position.z) ** 2)
-        L = 100
-        cartesian_r = L / (1 + np.exp(cartesian_dist)) 
-        return cartesian_r
-
-    # TODO: add another reward for not moving bed etc or pose
-         
+        return dist_penalty()
 
     def get_obs(self):
         self.state.rgb = self.arm.image
         self.state.depth = self.arm.depth[..., np.newaxis] # (480,640)->(480,640,1) 
         self.state.joint = np.array(self.arm.joint_angle.position)
         return self.state
-
 
     def close(self):
         # close the terminal and everything after finish training
@@ -198,7 +209,6 @@ class Arm:
         self.joint_angle
 
     def image_cb(self, msg):
-        
         self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
     
     def depth_cb(self, msg):
@@ -243,7 +253,7 @@ class World:
     def __init__(self):
         rospy.sleep(1)
         # self.pillow_z = self.get_height("Pillow")
-        self.pillow_desire_pose = [0.4001509859, 0.249076249827, 0.149965204174, -0.000692504034247, 0.00251693882414, 0.999993530658, 0.00247469165438]
+        self.pillow_goal_pose = [0.4001509859, 0.249076249827, 0.149965204174, -0.000692504034247, 0.00251693882414, 0.999993530658, 0.00247469165438]
         self.pillow_pose = self.get_model_state("Pillow")
 
     def pillow_move(self):
@@ -320,6 +330,10 @@ def test_Niryo():
     one_input = [0,0,-1,0,0,0,0]
     niryo.step(one_input)
 
+def test_reward():
+    print('Test Reward')
+    print(niryo.compute_reward())
+
 if __name__ == '__main__':
     niryo = Niryo()
     # test_arm()
@@ -329,6 +343,8 @@ if __name__ == '__main__':
     # test_world()
     # raw_input()
     # test_Niryo()
-    print(niryo.arm.image)
+    # print(niryo.arm.image)
+    # print(niryo.get_obs())
+    test_reward()
     print("Main Done")
     
