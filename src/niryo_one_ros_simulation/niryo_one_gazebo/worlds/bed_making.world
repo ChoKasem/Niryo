@@ -25,10 +25,15 @@
     </include>
 
     <include>
+      <pose>0.4 0.2 0.15 0 0 0</pose>
+      <uri>model://goal</uri>
+    </include>
+
+    <!-- <include>
       <static> true </static>
       <pose>0 0 0 0 0 0</pose>
       <uri>model://robot_room</uri>
-    </include> 
+    </include>  -->
  
 
     <plugin filename="libworld_edit.so" name="world_edit"/>

@@ -306,8 +306,9 @@ class World:
         Spawn SDF Model
 
         Args: 
-            model ('pillow' or 'goal'): model that want to spawn
+            model ('pillow' or 'goal'): model that want to spawn wrt to world
                 pillow and goal locations are limit to x = [0.25 to 0.4] and y = [-0.15 to 0.2] to keep it within camera and arm workspace 
+                z should be 0.2
             x, y, z row, pitch, yaw : coordinate and rotation with repect to the world coordinate
             
         Returns:
@@ -351,7 +352,7 @@ def test_gripper():
 
 def test_world():
     print("Get model state")
-    print(niryo.world.get_model_state("Pillow"))
+    print(niryo.world.get_model_state("Goal"))
     print("Get Height")
     print(niryo.world.get_height("Pillow"))
     niryo.world.reset()
@@ -376,12 +377,12 @@ if __name__ == '__main__':
     # raw_input()
     # test_gripper()
     # raw_input()
-    # test_world()
+    test_world()
     # raw_input()
     # test_Niryo()
     # print(niryo.arm.image)
     # print(niryo.get_obs())
     # test_reward()
-    niryo.world.spawn("Pillow", 0.4, -0.15, .2, 0 ,0,0)
+    # niryo.world.spawn("Pillow", 0.4, -0.15, .2, 0 ,0,0)
     print("Main Done")
     
