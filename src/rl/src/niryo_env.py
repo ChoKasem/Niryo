@@ -74,7 +74,7 @@ class Niryo:
         delta = 0.1
         pose = self.arm.get_end_effector_pose()
         # print(pose)
-        euler = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.y])
+        euler = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
         # print(euler)
         # print(euler[0] + delta * one_hot_input[3], euler[1] + delta * one_hot_input[4], euler[2] + delta * one_hot_input[5])
         q = tf.transformations.quaternion_from_euler(euler[0] + delta * step_vector[3], euler[1] + delta * step_vector[4], euler[2] + delta * step_vector[5])
@@ -308,16 +308,17 @@ class World:
         Args: 
             model ('pillow' or 'goal'): model that want to spawn wrt to world
                 pillow and goal locations are limit to x = [0.25 to 0.4] and y = [-0.15 to 0.2] to keep it within camera and arm workspace 
-                z should be 0.2
+                z should be 0.19 for pillow and 0.12 for goal
             x, y, z row, pitch, yaw : coordinate and rotation with repect to the world coordinate
             
         Returns:
             None
         '''
+        
         if model.lower() == "pillow":
             f = open('/home/joker/Niryo/src/niryo_one_ros_simulation/niryo_one_gazebo/models/pillow/model.sdf','r')
         elif model.lower() == "goal":
-            pass
+            f = open('/home/joker/Niryo/src/niryo_one_ros_simulation/niryo_one_gazebo/models/goal/model.sdf','r')
         #if goal
         initial_pose = Pose()
         q = tf.transformations.quaternion_from_euler(row, pitch, yaw)
