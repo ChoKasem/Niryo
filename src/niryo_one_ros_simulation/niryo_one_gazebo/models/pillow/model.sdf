@@ -2,7 +2,7 @@
 <sdf version="1.4">
   <model name="Pillow">
     <pose>0 0 0 0 0 0</pose>
-    <static>true</static>
+    <static>false</static>
     <link name="link">
       <inertial>
         <mass>1.0</mass>

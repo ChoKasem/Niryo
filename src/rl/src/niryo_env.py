@@ -69,7 +69,7 @@ class Niryo:
             list of length 7
             [x, y, z, row, pitch, yaw, gripper_angle]
 
-        return None
+        return obs, reward, done, info
         """
         delta = 0.1
         pose = self.arm.get_end_effector_pose()
@@ -164,10 +164,19 @@ class Niryo:
                 return -(dist > self.distance_threshold).astype(np.float32)
             else:
                 return -dist
-            
+        touch_matress_penalty = 0
+        touch_bedframe_penalty = 0
+        end_eff_pose = self.arm.get_end_effector_pose()
+        if end_eff_pose.position.z < 0.119:
+            touch_matress_penalty = -15
+            self.done = True
 
+
+        if enf_eff_pose.position.y > 0.2870:
+            touch_bedframe_penalty = -20
+            self.done = True
         
-        return dist_penalty()
+        return dist_penalty() + touch_mattress_penalty + touch_bedframe_penalty
 
     def get_obs(self):
         self.state.rgb = self.arm.image
@@ -283,6 +292,7 @@ class World:
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
         ans = self.reset_gazebo_world()
+        print(ans)
 
     def get_model_state(self, model):
         rospy.wait_for_service('/gazebo/get_model_state')
@@ -372,18 +382,29 @@ def test_reward():
     print('Test Reward')
     print(niryo.compute_reward())
 
+def test_rl_process():
+    one_input = [0,0,-1,0,0,0,0]
+    niryo.step(one_input)
+    niryo.step([0,0.5,1,0,0,0,2])
+    niryo.step([0,0.5,-2,0,0,0,2])
+    niryo.reset()
+    
+
+
 if __name__ == '__main__':
     niryo = Niryo()
     # test_arm()
     # raw_input()
     # test_gripper()
     # raw_input()
-    test_world()
+    # test_world()
     # raw_input()
     # test_Niryo()
     # print(niryo.arm.image)
     # print(niryo.get_obs())
     # test_reward()
     # niryo.world.spawn("Pillow", 0.4, -0.15, .2, 0 ,0,0)
+    test_rl_process()
+    # niryo.world.reset()
     print("Main Done")
     
