@@ -59,38 +59,76 @@ class Niryo:
         self.reward_type = reward_type
         self.distance_threshold = distance_threshold
     
+    # def step(self, step_vector):
+    #     """
+    #     Pass a [x, y, z, row, pitch, yaw, gripper_angle] vector to go to pose
+    #     which will be add delta to it if it's positive or deduct by delta if negative
+    #     Note: Angle are in radians
+
+    #     Args:
+    #         list of length 7
+    #         [x, y, z, row, pitch, yaw, gripper_angle]
+
+    #     return obs, reward, done, info
+    #     """
+    #     delta = 0.1
+    #     pose = self.arm.get_end_effector_pose()
+    #     # print(pose)
+    #     euler = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
+    #     # print(euler)
+    #     # print(euler[0] + delta * one_hot_input[3], euler[1] + delta * one_hot_input[4], euler[2] + delta * one_hot_input[5])
+    #     q = tf.transformations.quaternion_from_euler(euler[0] + delta * step_vector[3], euler[1] + delta * step_vector[4], euler[2] + delta * step_vector[5])
+    #     # print(q)
+    #     pose.position.x += delta * step_vector[0]
+    #     pose.position.y += delta * step_vector[1]
+    #     pose.position.z += delta * step_vector[2]
+    #     pose.orientation.x = q[0]
+    #     pose.orientation.y = q[1]
+    #     pose.orientation.z = q[2]
+    #     pose.orientation.w = q[3]
+
+    #     self.go_to_pose(pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
+    #     self.gripper.grab_angle(self.gripper.gripper_angle + delta * step_vector[6])
+
+
+    #     return self.get_obs(), self.compute_reward(), self.done, self.info
+
     def step(self, step_vector):
         """
-        Pass a [x, y, z, row, pitch, yaw, gripper_angle] vector to go to pose
+        Pass a vector of length 14
+        [x+, x-, y+, y-, z+, z-, row+, row-, pitch+, pitch-, yaw+, yaw-, gripper+, gripper-] 
+        vector to go to pose
         which will be add delta to it if it's positive or deduct by delta if negative
         Note: Angle are in radians
 
         Args:
-            list of length 7
-            [x, y, z, row, pitch, yaw, gripper_angle]
+            list of length 14
+            [x+, x-, y+, y-, z+, z-, row+, row-, pitch+, pitch-, yaw+, yaw-, gripper+, gripper-] 
+        
 
         return obs, reward, done, info
         """
-        delta = 0.1
+        delta = 0.1 #adjustable distance input
         pose = self.arm.get_end_effector_pose()
+        assert step_vector.count(0) == 13 and step_vector.count(1) == 1
         # print(pose)
         euler = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
-        # print(euler)
-        # print(euler[0] + delta * one_hot_input[3], euler[1] + delta * one_hot_input[4], euler[2] + delta * one_hot_input[5])
-        q = tf.transformations.quaternion_from_euler(euler[0] + delta * step_vector[3], euler[1] + delta * step_vector[4], euler[2] + delta * step_vector[5])
+        q = tf.transformations.quaternion_from_euler(
+            euler[0] + delta * (step_vector[6] - step_vector[7]), 
+            euler[1] + delta * (step_vector[8] - step_vector[9]),
+            euler[2] + delta * (step_vector[10] - step_vector[11])
+        )
         # print(q)
-        pose.position.x += delta * step_vector[0]
-        pose.position.y += delta * step_vector[1]
-        pose.position.z += delta * step_vector[2]
+        pose.position.x += delta * (step_vector[0] - step_vector[1])
+        pose.position.y += delta * (step_vector[2] - step_vector[3])
+        pose.position.z += delta * (step_vector[4] - step_vector[5])
         pose.orientation.x = q[0]
         pose.orientation.y = q[1]
         pose.orientation.z = q[2]
         pose.orientation.w = q[3]
 
         self.go_to_pose(pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
-        self.gripper.grab_angle(self.gripper.gripper_angle + delta * step_vector[6])
-
-
+        self.gripper.grab_angle(self.gripper.gripper_angle + delta * (step_vector[12] - step_vector[13]))
         return self.get_obs(), self.compute_reward(), self.done, self.info
 
     def reset(self):
@@ -164,7 +202,7 @@ class Niryo:
                 return -(dist > self.distance_threshold).astype(np.float32)
             else:
                 return -dist
-        touch_matress_penalty = 0
+        touch_mattress_penalty = 0
         touch_bedframe_penalty = 0
         end_eff_pose = self.arm.get_end_effector_pose()
         if end_eff_pose.position.z < 0.119:
@@ -172,7 +210,7 @@ class Niryo:
             self.done = True
 
 
-        if enf_eff_pose.position.y > 0.2870:
+        if end_eff_pose.position.y > 0.2870:
             touch_bedframe_penalty = -20
             self.done = True
         
@@ -310,8 +348,7 @@ class World:
         # print(state.pose.position.z)
         return state.pose.position.z
 
-    def spawn(self, model, x, y, z, row, pitch, yaw):
-        # TODO Spawn the goal block and pillow randomly?
+    def spawn(self, model, x, y, z, row, pitch, yaw, random=False):
         '''
         Spawn SDF Model
 
@@ -340,6 +377,9 @@ class World:
         initial_pose.orientation.z = q[2]
         initial_pose.orientation.w = q[3]
         sdff = f.read()
+
+        # if random==True:
+            # TODO Spawn the goal block and pillow randomly?
 
         rospy.wait_for_service('gazebo/spawn_sdf_model')
         spawn_model_prox = rospy.ServiceProxy('gazebo/spawn_sdf_model', SpawnModel)
@@ -383,10 +423,9 @@ def test_reward():
     print(niryo.compute_reward())
 
 def test_rl_process():
-    one_input = [0,0,-1,0,0,0,0]
-    niryo.step(one_input)
-    niryo.step([0,0.5,1,0,0,0,2])
-    niryo.step([0,0.5,-2,0,0,0,2])
+    one_input = np.identity(14)
+    for i in range(14):
+        niryo.step(one_input[i].tolist())
     niryo.reset()
     
 
