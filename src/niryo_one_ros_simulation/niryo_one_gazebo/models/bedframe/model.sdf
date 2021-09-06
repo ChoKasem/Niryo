@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <sdf version="1.4">
   <model name="BedFrame">
-    <static>false</static>
+    <static>true</static>
     <link name="link">
       <!-- Random Inertia and Mass -->
       <inertial>
@@ -34,6 +34,12 @@
             <scale> 0.001 0.001 0.001</scale>
           </mesh>
         </geometry>
+        <material>
+          <ambient>0.617 0.31 0.084 1</ambient>
+          <diffuse>0.617 0.31 0.084 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+          <emissive>0 0 0 0</emissive>
+        </material>
       </visual>
 
     </link>

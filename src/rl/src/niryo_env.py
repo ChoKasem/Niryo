@@ -5,7 +5,7 @@ import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState, Image
 from control_msgs.msg import GripperCommandActionGoal
-from gazebo_msgs.srv import GetModelState
+from gazebo_msgs.srv import GetModelState, SpawnModel
 from geometry_msgs.msg import *
 from std_srvs.srv import Empty
 import cv2
@@ -19,12 +19,33 @@ import niryo_moveit_commander
 
 class Niryo:
 
+    """
+    From openai gym, The main API methods that users of this class need to know are:
+        step
+        reset
+        render (ignore)
+        close
+        seed
+
+    And set the following attributes:
+        action_space: The Space object corresponding to valid actions
+        observation_space: The Space object corresponding to valid observations
+        reward_range: A tuple corresponding to the min and max possible rewards
+    """
+
     action_dim = 7
     num_joints = 12
     rgb_img_shape = (480, 640, 3)
     depth_img_shape = (480, 640, 1)
 
-    def __init__(self):
+    def __init__(self, reward_type = 'dense', distance_threshold = 0.05):
+
+        """Initializes a new Fetch environment.
+        Args:
+            distance_threshold (float): the threshold after which a goal is considered achieved
+            reward_type ('sparse' or 'dense'): the reward type, i.e. sparse or dense
+        """
+
         rospy.loginfo("Initialize Niryo RL Node")
         rospy.init_node('Niryo_RL_Node',
                     anonymous=True)
@@ -34,44 +55,111 @@ class Niryo:
         self.world = World()
         self.done = False
         self.info = None
+
+        self.reward_type = reward_type
+        self.distance_threshold = distance_threshold
     
-    def go_to_pose(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
-        self.arm.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
-    
+    # def step(self, step_vector):
+    #     """
+    #     Pass a [x, y, z, row, pitch, yaw, gripper_angle] vector to go to pose
+    #     which will be add delta to it if it's positive or deduct by delta if negative
+    #     Note: Angle are in radians
+
+    #     Args:
+    #         list of length 7
+    #         [x, y, z, row, pitch, yaw, gripper_angle]
+
+    #     return obs, reward, done, info
+    #     """
+    #     delta = 0.1
+    #     pose = self.arm.get_end_effector_pose()
+    #     # print(pose)
+    #     euler = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
+    #     # print(euler)
+    #     # print(euler[0] + delta * one_hot_input[3], euler[1] + delta * one_hot_input[4], euler[2] + delta * one_hot_input[5])
+    #     q = tf.transformations.quaternion_from_euler(euler[0] + delta * step_vector[3], euler[1] + delta * step_vector[4], euler[2] + delta * step_vector[5])
+    #     # print(q)
+    #     pose.position.x += delta * step_vector[0]
+    #     pose.position.y += delta * step_vector[1]
+    #     pose.position.z += delta * step_vector[2]
+    #     pose.orientation.x = q[0]
+    #     pose.orientation.y = q[1]
+    #     pose.orientation.z = q[2]
+    #     pose.orientation.w = q[3]
+
+    #     self.go_to_pose(pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
+    #     self.gripper.grab_angle(self.gripper.gripper_angle + delta * step_vector[6])
+
+
+    #     return self.get_obs(), self.compute_reward(), self.done, self.info
+
     def step(self, step_vector):
         """
-        Pass a [x, y, z, row, pitch, yaw, gripper_angle] vector to go to pose
+        Pass a vector of length 14
+        [x+, x-, y+, y-, z+, z-, row+, row-, pitch+, pitch-, yaw+, yaw-, gripper+, gripper-] 
+        vector to go to pose
         which will be add delta to it if it's positive or deduct by delta if negative
         Note: Angle are in radians
 
         Args:
-            list of length 7
-            [x, y, z, row, pitch, yaw, gripper_angle]
+            list of length 14
+            [x+, x-, y+, y-, z+, z-, row+, row-, pitch+, pitch-, yaw+, yaw-, gripper+, gripper-] 
+        
 
-        return None
+        return obs, reward, done, info
         """
-        delta = 0.05
+        delta = 0.1 #adjustable distance input
         pose = self.arm.get_end_effector_pose()
+        assert step_vector.count(0) == 13 and step_vector.count(1) == 1
         # print(pose)
-        euler = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.y])
-        # print(euler)
-        # print(euler[0] + delta * one_hot_input[3], euler[1] + delta * one_hot_input[4], euler[2] + delta * one_hot_input[5])
-        q = tf.transformations.quaternion_from_euler(euler[0] + delta * step_vector[3], euler[1] + delta * step_vector[4], euler[2] + delta * step_vector[5])
+        euler = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
+        q = tf.transformations.quaternion_from_euler(
+            euler[0] + delta * (step_vector[6] - step_vector[7]), 
+            euler[1] + delta * (step_vector[8] - step_vector[9]),
+            euler[2] + delta * (step_vector[10] - step_vector[11])
+        )
         # print(q)
-        pose.position.x += delta * step_vector[0]
-        pose.position.y += delta * step_vector[1]
-        pose.position.z += delta * step_vector[2]
+        pose.position.x += delta * (step_vector[0] - step_vector[1])
+        pose.position.y += delta * (step_vector[2] - step_vector[3])
+        pose.position.z += delta * (step_vector[4] - step_vector[5])
         pose.orientation.x = q[0]
         pose.orientation.y = q[1]
         pose.orientation.z = q[2]
         pose.orientation.w = q[3]
 
         self.go_to_pose(pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
-        self.gripper.grab_angle(self.gripper.gripper_angle + delta * step_vector[6])
-
-
+        self.gripper.grab_angle(self.gripper.gripper_angle + delta * (step_vector[12] - step_vector[13]))
         return self.get_obs(), self.compute_reward(), self.done, self.info
 
+    def reset(self):
+        """Resets the environment to an initial state and returns an initial
+        observation. The robot will move to dafult position and gazebo world
+        is reset.
+
+        Note that this function should not reset the environment's random
+        number generator(s); random variables in the environment's state should
+        be sampled independently between multiple calls to `reset()`. In other
+        words, each call of `reset()` should yield an environment suitable for
+        a new episode, independent of previous episodes.
+        
+        Returns:
+            observation (object): the initial observation.
+        """
+        self.reset_pose()
+        self.world.reset()
+
+    def close(self):
+        """Override close in your subclass to perform any necessary cleanup.
+        Environments will automatically close() themselves when
+        garbage collected or when the program exits.
+
+        TODO: see how to close gazebo and moveit with python command
+        """
+        pass
+    
+    def go_to_pose(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
+        self.arm.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
+    
     def reset_pose(self):
         # starting joint state
         joints = [-4.00038318737e-05, -0.00169649498877, -0.00135103272703, 1.82992589703e-05, -0.0005746965517, 7.78535278902e-05]
@@ -99,21 +187,34 @@ class Niryo:
         return self.get_obs(), self.compute_reward(), self.done, self.info
 
     def compute_reward(self):
-        # possible neg reward if arm hit other object and + reward if get pillow to desire pose
-        # include z orientation
-        if self.world.pillow_move() is True:
-            return self.loss()
-        
-        return 0
+        '''
+        Compute the Reward, composing of # terms
+        1) dist_penalty : penalize distance proportion to distance between goal and pillow
+        TODO: penalized for how off the orientation of pillow is to goal oritation
+        TODO: penalized for getting to deep into the bed (or don't touch bed at all, terminate if it does) or if hit bedframe
+        TODO: ?maybe give high reward for placing pillow in correct pose and orientation witin threshold
+        '''
+        def dist_penalty():
+            goal = self.world.pillow_goal_pose
+            current = self.world.pillow_pose
+            dist = np.sqrt((goal[0] - current.pose.position.x) ** 2 + (goal[1] - current.pose.position.y) ** 2 + (goal[2] - current.pose.position.z) ** 2)
+            if self.reward_type == 'sparse':
+                return -(dist > self.distance_threshold).astype(np.float32)
+            else:
+                return -dist
+        touch_mattress_penalty = 0
+        touch_bedframe_penalty = 0
+        end_eff_pose = self.arm.get_end_effector_pose()
+        if end_eff_pose.position.z < 0.119:
+            touch_matress_penalty = -15
+            self.done = True
 
-    def loss(self):
-        desire = self.world.pillow_desire_pose
-        current = self.world.pillow_pose
-        dist = np.sqrt((desire[0] - current.pose.position.x) ** 2 + (desire[1] - current.pose.position.y) ** 2 + (desire[2] - current.pose.position.z) ** 2)
-        L = 100
-        reward = L / (1 + np.exp(dist)) 
-        return reward
-         
+
+        if end_eff_pose.position.y > 0.2870:
+            touch_bedframe_penalty = -20
+            self.done = True
+        
+        return dist_penalty() + touch_mattress_penalty + touch_bedframe_penalty
 
     def get_obs(self):
         self.state.rgb = self.arm.image
@@ -121,7 +222,6 @@ class Niryo:
         self.state.joint = np.array(self.arm.joint_angle.position)
         return self.state
 
-    
     def close(self):
         # close the terminal and everything after finish training
         pass
@@ -156,7 +256,6 @@ class Arm:
         self.joint_angle
 
     def image_cb(self, msg):
-        
         self.image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
     
     def depth_cb(self, msg):
@@ -201,7 +300,10 @@ class World:
     def __init__(self):
         rospy.sleep(1)
         # self.pillow_z = self.get_height("Pillow")
-        self.pillow_desire_pose = [0.4001509859, 0.249076249827, 0.149965204174, -0.000692504034247, 0.00251693882414, 0.999993530658, 0.00247469165438]
+        self.pillow_goal_pose = [0.4001509859, 0.249076249827, 0.149965204174, -0.000692504034247, 0.00251693882414, 0.999993530658, 0.00247469165438]
+        self.pillow_pose = self.get_model_state("Pillow")
+
+    def update_world_state(self):
         self.pillow_pose = self.get_model_state("Pillow")
 
     def pillow_move(self):
@@ -228,6 +330,7 @@ class World:
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
         ans = self.reset_gazebo_world()
+        print(ans)
 
     def get_model_state(self, model):
         rospy.wait_for_service('/gazebo/get_model_state')
@@ -244,6 +347,43 @@ class World:
         state = self.get_model_state(model)
         # print(state.pose.position.z)
         return state.pose.position.z
+
+    def spawn(self, model, x, y, z, row, pitch, yaw, random=False):
+        '''
+        Spawn SDF Model
+
+        Args: 
+            model ('pillow' or 'goal'): model that want to spawn wrt to world
+                pillow and goal locations are limit to x = [0.25 to 0.4] and y = [-0.15 to 0.2] to keep it within camera and arm workspace 
+                z should be 0.19 for pillow and 0.12 for goal
+            x, y, z row, pitch, yaw : coordinate and rotation with repect to the world coordinate
+            
+        Returns:
+            None
+        '''
+        
+        if model.lower() == "pillow":
+            f = open('/home/joker/Niryo/src/niryo_one_ros_simulation/niryo_one_gazebo/models/pillow/model.sdf','r')
+        elif model.lower() == "goal":
+            f = open('/home/joker/Niryo/src/niryo_one_ros_simulation/niryo_one_gazebo/models/goal/model.sdf','r')
+        #if goal
+        initial_pose = Pose()
+        q = tf.transformations.quaternion_from_euler(row, pitch, yaw)
+        initial_pose.position.x = x
+        initial_pose.position.y = y
+        initial_pose.position.z = z
+        initial_pose.orientation.x = q[0]
+        initial_pose.orientation.y = q[1]
+        initial_pose.orientation.z = q[2]
+        initial_pose.orientation.w = q[3]
+        sdff = f.read()
+
+        # if random==True:
+            # TODO Spawn the goal block and pillow randomly?
+
+        rospy.wait_for_service('gazebo/spawn_sdf_model')
+        spawn_model_prox = rospy.ServiceProxy('gazebo/spawn_sdf_model', SpawnModel)
+        spawn_model_prox("pillow", sdff, "", initial_pose, "world")
 
 def test_arm():
     # niryo = Niryo()
@@ -263,7 +403,7 @@ def test_gripper():
 
 def test_world():
     print("Get model state")
-    print(niryo.world.get_model_state("Pillow"))
+    print(niryo.world.get_model_state("Goal"))
     print("Get Height")
     print(niryo.world.get_height("Pillow"))
     niryo.world.reset()
@@ -278,6 +418,17 @@ def test_Niryo():
     one_input = [0,0,-1,0,0,0,0]
     niryo.step(one_input)
 
+def test_reward():
+    print('Test Reward')
+    print(niryo.compute_reward())
+
+def test_rl_process():
+    one_input = np.identity(14)
+    for i in range(14):
+        niryo.step(one_input[i].tolist())
+    niryo.reset()
+    
+
 
 if __name__ == '__main__':
     niryo = Niryo()
@@ -288,6 +439,11 @@ if __name__ == '__main__':
     # test_world()
     # raw_input()
     # test_Niryo()
-    print(niryo.arm.image)
+    # print(niryo.arm.image)
+    # print(niryo.get_obs())
+    # test_reward()
+    # niryo.world.spawn("Pillow", 0.4, -0.15, .2, 0 ,0,0)
+    test_rl_process()
+    # niryo.world.reset()
     print("Main Done")
     
