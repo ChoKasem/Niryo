@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <sdf version="1.4">
   <model name="Bed">
-    <static>true</static>
+    <static>false</static>
     <link name="link">
       <!-- Random Inertia and Mass -->
       <inertial>
