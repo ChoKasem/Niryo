@@ -29,7 +29,27 @@ class World:
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
         self.reset_gazebo_world()
-    
+
+    def check_bed_movement(self):
+        ''' TODO: find a way to get difference between two Pose()
+        
+        compare new location of bed and bedframe, if move beyond
+        certain length then reset the environment (ie return done as True)
+        use inside step funtion to return correct done condition
+        '''
+        if self.bedframe_pose != self.get_model_state("BedFrame"):
+                    print("Bed Frame has moved")
+                    print(self.bedframe_pose)
+                    print(self.get_model_state("BedFrame"))
+                    print(self.bedframe_pose - )
+                    return True
+
+        if self.bed_pose != self.get_model_state("Bed"):
+            print("Bed has moved")
+            return True
+        
+        return False
+
     def pillow_move(self):
         # if pillow doesn't move, return 0
         # if pillow move, calculate reward
@@ -46,8 +66,6 @@ class World:
             return True
         return False
     
-    
-
     def get_model_state(self, model):
         rospy.wait_for_service('/gazebo/get_model_state')
         try:
@@ -114,5 +132,7 @@ if __name__ == '__main__':
     print("Inside world.py")
     world = World()
     # world.reset()
-    print(world.get_model_state("niryo_one"))
+    # print(world.get_model_state("niryo_one"))
     # world.spawn("Pillow", 0.4, -0.15, .2, 0 ,0,0)
+    raw_input()
+    world.check_bed_movement()
