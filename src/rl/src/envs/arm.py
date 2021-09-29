@@ -53,6 +53,9 @@ class Arm:
 
     def get_end_effector_pose(self):
         return self.command.get_pose()
+
+    def test_arm(self):
+        print("Success import!")
         
 class Gripper:
     

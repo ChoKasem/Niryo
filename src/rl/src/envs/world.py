@@ -41,7 +41,7 @@ class World:
                     print("Bed Frame has moved")
                     print(self.bedframe_pose)
                     print(self.get_model_state("BedFrame"))
-                    print(self.bedframe_pose - )
+                    print(self.bedframe_pose)
                     return True
 
         if self.bed_pose != self.get_model_state("Bed"):
