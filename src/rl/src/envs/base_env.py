@@ -24,8 +24,8 @@ class Env(object):
     spec = None
 
     # Set these in ALL subclasses
-    action_space = None
-    observation_space = None
+    self.action_space = Action()
+    self.observation_space = None
 
     @abstractmethod
     def step(self, action):
@@ -55,6 +55,12 @@ class Env(object):
         Returns:
             observation (object): the initial observation.
         """
+        raise NotImplementedError
+
+class Action(object):
+    self.n = 0
+    self.action = []
+    def sample(self):
         raise NotImplementedError
 
 if __name__ == '__main__':

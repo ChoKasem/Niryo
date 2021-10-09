@@ -19,7 +19,7 @@ class Niryo(Env):
     """
 
     # TODO: modify these to match base_env
-    action_dim = 7
+    self.action_space.n = 7
     num_joints = 12
     rgb_img_shape = (480, 640, 3)
     depth_img_shape = (480, 640, 1)
@@ -32,10 +32,10 @@ class Niryo(Env):
             reward_type ('sparse' or 'dense'): the reward type, i.e. sparse or dense
         """
 
-        rospy.loginfo("Initialize Niryo RL Node")
-        rospy.init_node('Niryo_RL_Node',
-                    anonymous=True)
-        self.state = State(None,None,None,None)
+        # rospy.loginfo("Initialize Niryo RL Node")
+        # rospy.init_node('Niryo_RL_Node',
+        #             anonymous=True)
+        # self.state = State(None,None,None,None)
         self.arm = Arm()            
         self.gripper = Gripper()
         self.world = World()
@@ -100,6 +100,7 @@ class Niryo(Env):
         self.reset_pose()
         self.world.reset()
 
-
 if __name__ == '__main__':
     print("Inside niryo_env.py")
+    niryo = Niryo()
+    print(niryo.action_space.n)

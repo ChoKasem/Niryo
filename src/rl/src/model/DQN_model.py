@@ -145,3 +145,4 @@ if __name__ == '__main__':
     output = model(img, joint, pillow_pose, goal_pose, gripper)
     print("Model Output")
     print(output)
+    print("Done")
