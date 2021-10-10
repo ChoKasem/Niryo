@@ -1,4 +1,23 @@
 from abc import abstractmethod
+import numpy as np
+
+
+class ActionSpace(object):
+    def __init__(self):
+        self.n = 0
+        self.action = []
+    def sample(self):
+        num = np.random.randint(low = 0, high=self.n)
+        print("action num: ", num)
+        return self.action[num]
+
+class ObservationSpace(object):
+    def __init__(self, rgb, pillow, goal, joint, gripper):
+        self.rgb = rgb
+        self.pillow = pillow
+        self.goal = goal
+        self.joint = joint
+        self.gripper = gripper
 
 class Env(object):
     """The main OpenAI Gym class. It encapsulates an environment with
@@ -19,13 +38,14 @@ class Env(object):
     """
 
     # Set this in SOME subclasses
-    metadata = {"render.modes": []}
+    # metadata = {"render.modes": []}
     reward_range = (-float("inf"), float("inf"))
     spec = None
 
     # Set these in ALL subclasses
-    self.action_space = Action()
-    self.observation_space = None
+    def __init__(self):
+        self.action_space = ActionSpace()
+        self.observation_space = None
 
     @abstractmethod
     def step(self, action):
@@ -57,11 +77,7 @@ class Env(object):
         """
         raise NotImplementedError
 
-class Action(object):
-    self.n = 0
-    self.action = []
-    def sample(self):
-        raise NotImplementedError
+
 
 if __name__ == '__main__':
     print("Inside base_env.py")

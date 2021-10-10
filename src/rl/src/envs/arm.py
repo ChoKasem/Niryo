@@ -2,14 +2,12 @@ import rospy
 from cv_bridge import CvBridge, CvBridgeError
 from control_msgs.msg import GripperCommandActionGoal
 from sensor_msgs.msg import JointState, Image
-
 from std_msgs.msg import String
 from gazebo_msgs.srv import GetModelState, SpawnModel
 from geometry_msgs.msg import *
 from std_srvs.srv import Empty
 import matplotlib.pyplot as plt
 import cv2
-
 
 import niryo_moveit_commander
 

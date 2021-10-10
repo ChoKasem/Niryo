@@ -1,6 +1,10 @@
+import rospy
+import numpy as np
+import tf
+
 from arm import Arm, Gripper
 from world import World
-from base_env import Env
+from base_env import Env, ActionSpace, ObservationSpace
 
 class Niryo(Env):
 
@@ -19,7 +23,9 @@ class Niryo(Env):
     """
 
     # TODO: modify these to match base_env
-    self.action_space.n = 7
+
+        
+
     num_joints = 12
     rgb_img_shape = (480, 640, 3)
     depth_img_shape = (480, 640, 1)
@@ -36,6 +42,12 @@ class Niryo(Env):
         # rospy.init_node('Niryo_RL_Node',
         #             anonymous=True)
         # self.state = State(None,None,None,None)
+        super(Niryo, self).__init__()
+        self.action_space.n = 14
+        self.action_space.action = np.identity(14)
+        # self.action_space.sample()
+
+        # parts of robot
         self.arm = Arm()            
         self.gripper = Gripper()
         self.world = World()
@@ -61,14 +73,16 @@ class Niryo(Env):
         return obs, reward, done, info
         """
         delta = 0.1 #adjustable distance input
+        delta_angle = 0.5 # TODO could have another number for angle
+        delta_gripper = 1.2 # TODO have number for gripper
         pose = self.arm.get_end_effector_pose()
-        assert step_vector.count(0) == 13 and step_vector.count(1) == 1
+        # assert step_vector.count(0) == 13 and step_vector.count(1) == 1
         # print(pose)
         euler = tf.transformations.euler_from_quaternion([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
         q = tf.transformations.quaternion_from_euler(
-            euler[0] + delta * (step_vector[6] - step_vector[7]), 
-            euler[1] + delta * (step_vector[8] - step_vector[9]),
-            euler[2] + delta * (step_vector[10] - step_vector[11])
+            euler[0] + delta_angle * (step_vector[6] - step_vector[7]), 
+            euler[1] + delta_angle * (step_vector[8] - step_vector[9]),
+            euler[2] + delta_angle * (step_vector[10] - step_vector[11])
         )
         # print(q)
         pose.position.x += delta * (step_vector[0] - step_vector[1])
@@ -80,8 +94,8 @@ class Niryo(Env):
         pose.orientation.w = q[3]
 
         self.go_to_pose(pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
-        self.gripper.grab_angle(self.gripper.gripper_angle + delta * (step_vector[12] - step_vector[13]))
-        return self.get_obs(), self.compute_reward(), self.done, self.info
+        self.gripper.grab_angle(self.gripper.gripper_angle + delta_gripper * (step_vector[12] - step_vector[13]))
+        # return self.get_obs(), self.compute_reward(), self.done, self.info
 
     def reset(self):
         """Resets the environment to an initial state and returns an initial
@@ -100,7 +114,65 @@ class Niryo(Env):
         self.reset_pose()
         self.world.reset()
 
+    def go_to_pose(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
+        self.arm.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
+
+    def compute_reward(self):
+        '''
+        Compute the Reward, composing of # terms
+        1) dist_penalty : penalize distance proportion to distance between goal and pillow
+        TODO: penalized for how off the orientation of pillow is to goal oritation
+        TODO: penalized for getting to deep into the bed (or don't touch bed at all, terminate if it does) or if hit bedframe
+        TODO: ?maybe give high reward for placing pillow in correct pose and orientation witin threshold
+        '''
+        def dist_penalty():
+            goal = self.world.goal_pose
+            current = self.world.pillow_pose
+            # print("Goal")
+            # print(goal)
+            # print("Current")
+            # print(current)
+            dist = np.sqrt((goal.pose.position.x - current.pose.position.x) ** 2 + (goal.pose.position.y - current.pose.position.y) ** 2 + (goal.pose.position.z - current.pose.position.z) ** 2)
+            if self.reward_type == 'sparse':
+                return -(dist > self.distance_threshold).astype(np.float32)
+            else:
+                return -dist
+        touch_mattress_penalty = 0
+        touch_bedframe_penalty = 0
+        end_eff_pose = self.arm.get_end_effector_pose()
+        if end_eff_pose.position.z < 0.119:
+            touch_matress_penalty = -15
+            self.done = True
+
+
+        if end_eff_pose.position.y > 0.2870:
+            touch_bedframe_penalty = -20
+            self.done = True
+        
+        return dist_penalty() + touch_mattress_penalty + touch_bedframe_penalty
+
+    def get_obs(self):
+        state = ObservationSpace()
+
 if __name__ == '__main__':
     print("Inside niryo_env.py")
+    rospy.loginfo("Initialize Niryo RL Node")
+    rospy.init_node('Niryo_Env_Test_Node',
+                    anonymous=True)
     niryo = Niryo()
-    print(niryo.action_space.n)
+    # print(niryo.action_space.sample())
+    # print("ready to move")
+    # niryo.step(niryo.action_space.action[6])
+    # niryo.step(niryo.action_space.action[7])
+    # niryo.step(niryo.action_space.action[8])
+    # niryo.step(niryo.action_space.action[9])
+    # niryo.step(niryo.action_space.action[10])
+    # niryo.step(niryo.action_space.action[11])
+    # niryo.step(niryo.action_space.action[12])
+    # niryo.step(niryo.action_space.action[12])
+    # niryo.step(niryo.action_space.action[13])
+
+    print("computing reward")
+    print(niryo.compute_reward())
+    print("Done")
+
