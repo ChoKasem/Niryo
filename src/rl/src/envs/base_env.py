@@ -1,6 +1,6 @@
 from abc import abstractmethod
 import numpy as np
-
+import torch
 
 class ActionSpace(object):
     def __init__(self):
@@ -13,11 +13,16 @@ class ActionSpace(object):
 
 class ObservationSpace(object):
     def __init__(self, rgb, pillow, goal, joint, gripper):
-        self.rgb = rgb
-        self.pillow = pillow
-        self.goal = goal
-        self.joint = joint
-        self.gripper = gripper
+        self.rgb = torch.from_numpy(rgb).float()
+        self.pillow = torch.tensor(self.pose2vector(pillow))
+        self.goal = torch.tensor(self.pose2vector(goal))
+        self.joint = torch.tensor(joint)
+        self.gripper = torch.tensor([gripper]).float()
+    
+    def pose2vector(self, pose):
+        # print(pose)
+        vec = [pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w]
+        return vec
 
 class Env(object):
     """The main OpenAI Gym class. It encapsulates an environment with

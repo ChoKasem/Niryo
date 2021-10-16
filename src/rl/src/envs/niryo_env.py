@@ -1,6 +1,7 @@
 import rospy
 import numpy as np
 import tf
+import torch
 
 from arm import Arm, Gripper
 from world import World
@@ -95,7 +96,7 @@ class Niryo(Env):
 
         self.go_to_pose(pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w)
         self.gripper.grab_angle(self.gripper.gripper_angle + delta_gripper * (step_vector[12] - step_vector[13]))
-        # return self.get_obs(), self.compute_reward(), self.done, self.info
+        return self.get_obs(), self.compute_reward(), self.done, self.info
 
     def reset(self):
         """Resets the environment to an initial state and returns an initial
@@ -152,7 +153,8 @@ class Niryo(Env):
         return dist_penalty() + touch_mattress_penalty + touch_bedframe_penalty
 
     def get_obs(self):
-        state = ObservationSpace()
+        state = ObservationSpace(self.arm.image, self.world.pillow_pose.pose, self.world.goal_pose.pose, self.arm.joint_angle.position[:6], self.gripper.gripper_angle)
+        return state
 
 if __name__ == '__main__':
     print("Inside niryo_env.py")
@@ -172,7 +174,14 @@ if __name__ == '__main__':
     # niryo.step(niryo.action_space.action[12])
     # niryo.step(niryo.action_space.action[13])
 
-    print("computing reward")
-    print(niryo.compute_reward())
-    print("Done")
+    # print("computing reward")
+    # print(niryo.compute_reward())
+    # print("Done")
 
+    # print("getting observation")
+    # obs = niryo.get_obs()
+    # print(obs.rgb)
+    # print(obs.pillow)
+    # print(obs.goal)
+    # print(obs.joint)
+    # print(obs.gripper)

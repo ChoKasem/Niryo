@@ -3,6 +3,7 @@ import torch.nn.functional as F
 import torch
 import numpy as np
 import rospy
+import datetime
 
 import sys
 sys.path.append("..")
@@ -12,6 +13,8 @@ from envs import Arm, World, Gripper
 class DQN_model(nn.Module):
     def __init__(self, img_ch, num_joint, num_action):
         super(DQN_model, self).__init__()
+        now = datetime.datetime.now()
+        self.savefile = str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '-' + str(now.hour) + '-' + str(now.minute) + '.pt'
         self.img_net = nn.Sequential(
             nn.Conv2d(img_ch, 32, 3, 2),
             nn.ReLU(),
@@ -89,46 +92,52 @@ class DQN_model(nn.Module):
         # print(out.shape)
         return out
 
+    def save_model(self):
+        torch.save(self.state_dict(), '../save_model/' + self.savefile)
+
+    def load_model(self, PATH):
+        self.load_state_dict(torch.load(PATH))
+
 def pose2vector(pose):
     vec = [pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w]
     return vec
 
 
 if __name__ == '__main__':
-    print("Inside DQN_model.py")
-    rospy.loginfo("Initialize Niryo RL Node")
-    rospy.init_node('DQN_Model_Test_Node',
-                    anonymous=True)
-    arm = Arm()
-    world = World()
-    Gripper = Gripper()
-    # # qnet = DQN_model()
-    # print("Arm Ready")
+    # print("Inside DQN_model.py")
+    # rospy.loginfo("Initialize Niryo RL Node")
+    # rospy.init_node('DQN_Model_Test_Node',
+    #                 anonymous=True)
+    # arm = Arm()
+    # world = World()
+    # Gripper = Gripper()
+    # # # qnet = DQN_model()
+    # # print("Arm Ready")
 
-    # image
-    # print(arm.image.shape)
-    # # print(arm.image)
-    img = torch.from_numpy(arm.image).float()
-    # print(img_torch)
+    # # image
+    # # print(arm.image.shape)
+    # # # print(arm.image)
+    # img = torch.from_numpy(arm.image).float()
+    # # print(img_torch)
 
-    # joint
-    # print("Print Joint")
-    # print(arm.joint_angle)
-    joint = arm.joint_angle.position[:6]
-    joint = torch.tensor(joint)
-    # print(joint_torch)
-    # print(joint_torch.type())
+    # # joint
+    # # print("Print Joint")
+    # # print(arm.joint_angle)
+    # joint = arm.joint_angle.position[:6]
+    # joint = torch.tensor(joint)
+    # # print(joint_torch)
+    # # print(joint_torch.type())
 
-    # pillow pose
-    pillow_pose = pose2vector(world.pillow_pose.pose)
-    pillow_pose = torch.tensor(pillow_pose)
+    # # pillow pose
+    # pillow_pose = pose2vector(world.pillow_pose.pose)
+    # pillow_pose = torch.tensor(pillow_pose)
     
-    # goal pose
-    goal_pose = pose2vector(world.goal_pose.pose)
-    goal_pose = torch.tensor(goal_pose)
+    # # goal pose
+    # goal_pose = pose2vector(world.goal_pose.pose)
+    # goal_pose = torch.tensor(goal_pose)
 
-    # gripper
-    gripper = torch.tensor([Gripper.gripper_angle]).float()
+    # # gripper
+    # gripper = torch.tensor([Gripper.gripper_angle]).float()
 
 
 # mock data
@@ -142,7 +151,12 @@ if __name__ == '__main__':
 
     model = DQN_model(3,6,14)
     # print(model)
-    output = model(img, joint, pillow_pose, goal_pose, gripper)
-    print("Model Output")
-    print(output)
-    print("Done")
+    # output = model(img, joint, pillow_pose, goal_pose, gripper)
+    # print("Model Output")
+    # print(output)
+    # print("Done")
+
+    model.save_model()
+    print('save done')
+    # model.load_model()
+    # print('load done')
