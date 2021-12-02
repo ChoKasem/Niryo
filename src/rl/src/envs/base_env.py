@@ -13,11 +13,13 @@ class ActionSpace(object):
 
 class ObservationSpace(object):
     def __init__(self, rgb, pillow, goal, joint, gripper):
-        self.rgb = torch.from_numpy(rgb).float()
-        self.pillow = torch.tensor(self.pose2vector(pillow))
-        self.goal = torch.tensor(self.pose2vector(goal))
-        self.joint = torch.tensor(joint)
-        self.gripper = torch.tensor([gripper]).float()
+        img = torch.from_numpy(rgb).float()
+        img = torch.reshape(img, (-1, 3, 480, 640))
+        self.rgb = img
+        self.pillow = torch.reshape(torch.tensor(self.pose2vector(pillow)), (-1,7))
+        self.goal = torch.reshape(torch.tensor(self.pose2vector(goal)), (-1, 7))
+        self.joint = torch.reshape(torch.tensor(joint), (-1,6))
+        self.gripper = torch.reshape(torch.tensor([gripper]).float(), (-1,1))
     
     def pose2vector(self, pose):
         # print(pose)

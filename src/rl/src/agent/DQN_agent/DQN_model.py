@@ -4,15 +4,17 @@ import torch
 import numpy as np
 import rospy
 import datetime
+import random
 
 import sys
-sys.path.append("..")
+sys.path.append("../..")
 
-from envs import Arm, World, Gripper
+from envs import Arm, World, Gripper, Niryo
 
 class DQN_model(nn.Module):
     def __init__(self, img_ch, num_joint, num_action):
         super(DQN_model, self).__init__()
+        self.num_acition = num_action
         now = datetime.datetime.now()
         self.savefile = str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '-' + str(now.hour) + '-' + str(now.minute) + '.pt'
         self.img_net = nn.Sequential(
@@ -22,10 +24,10 @@ class DQN_model(nn.Module):
             nn.Conv2d(32, 32, 3, 2),
             nn.ReLU(),
             nn.MaxPool2d(2),
-            nn.Conv2d(32, 32, 3, 2),
+            nn.Conv2d(32, 1, 3, 2),
             nn.ReLU(),
             nn.MaxPool2d(2),
-            nn.Flatten(0,-1),
+            nn.Flatten(),
         )
 
         self.pillow_net = nn.Sequential(
@@ -58,7 +60,7 @@ class DQN_model(nn.Module):
         )
 
         self.action_net = nn.Sequential(
-            nn.Linear(2034, 1000),
+            nn.Linear(81, 1000),
             nn.ReLU(),
             nn.Linear(1000, 500),
             nn.ReLU(),
@@ -69,14 +71,21 @@ class DQN_model(nn.Module):
             nn.Linear(50, num_action)
         )
 
+    def obs_forward(self, obs):
+        return self.forward(obs.rgb, obs.joint, obs.pillow, obs.goal, obs.gripper)
+
     def forward(self, img, joint, pillow, goal, gripper):
-        img = torch.reshape(img, (-1,3,480,640))
+        # img = torch.reshape(img, (-1,3,480,640))
         img_out = self.img_net(img)
-        # img_out = torch.flatten(img_out)
+        # print("Img:", img_out.size(), img_out)
         pillow_out = self.pillow_net(pillow)
+        # print("Pillow:", pillow_out.size(), pillow_out)
         goal_out = self.goal_net(goal)
+        # print("Goal:", goal_out.size(), goal_out)
         joint_out = self.joint_net(joint)
+        # print("Joint:",joint_out.size(), joint_out)
         gripper_out = self.gripper_net(gripper)
+        # print("Gripper:",gripper_out.size(), gripper_out)
 
         # Concatenate in dim1 (feature dimension)
         # print(img_out.shape)
@@ -86,11 +95,18 @@ class DQN_model(nn.Module):
         # print(joint_out.shape)
         # print(gripper_out.shape)
         
-        out = torch.cat((img_out, pillow_out, goal_out, joint_out, gripper_out))
-        print(out.shape)
+        out = torch.cat((img_out, pillow_out, goal_out, joint_out, gripper_out),1)
         out = self.action_net(out)
         # print(out.shape)
         return out
+
+    def sample_action(self, obs, epsilon):
+        out = self.obs_forward(obs)
+        coin = random.random()
+        if coin < epsilon:
+            return random.randint(0,self.num_acition-1)
+        else:
+            return out.argmax().item()
 
     def save_model(self):
         torch.save(self.state_dict(), '../save_model/' + self.savefile)
@@ -104,19 +120,22 @@ def pose2vector(pose):
 
 
 if __name__ == '__main__':
-    # print("Inside DQN_model.py")
+    print("Inside DQN_model.py")
     # rospy.loginfo("Initialize Niryo RL Node")
     # rospy.init_node('DQN_Model_Test_Node',
-    #                 anonymous=True)
+                    # anonymous=True)
     # arm = Arm()
     # world = World()
     # Gripper = Gripper()
-    # # # qnet = DQN_model()
-    # # print("Arm Ready")
+    # env = Niryo()
+    # print("done making env")
+    # obs = env.get_obs()
+    # # qnet = DQN_model()
+    # print("Arm Ready")
 
-    # # image
-    # # print(arm.image.shape)
-    # # # print(arm.image)
+    # image
+    # print(arm.image.shape)
+    # # print(arm.image)
     # img = torch.from_numpy(arm.image).float()
     # # print(img_torch)
 
@@ -143,20 +162,20 @@ if __name__ == '__main__':
 # mock data
     # img = torch.randn(480, 640, 3)
     # x = torch.reshape(img, (-1,3,480,640))
+    img = torch.randint(0,255, (1,3,480,640), dtype=torch.float32)
     # print(x.shape)
-    # joint = torch.randn(6)
-    # pillow_pose = torch.randn(7)
-    # goal_pose = torch.randn(7)
-    # gripper = torch.randn(1)
+    joint = torch.randn((1,6))
+    pillow_pose = torch.randn((1,7))
+    goal_pose = torch.randn((1,7))
+    gripper = torch.randn((1,1))
 
     model = DQN_model(3,6,14)
-    # print(model)
-    # output = model(img, joint, pillow_pose, goal_pose, gripper)
-    # print("Model Output")
-    # print(output)
-    # print("Done")
+    output = model(img, joint, pillow_pose, goal_pose, gripper)
+    print("Model Output")
+    print(output)
+    print("Done")
 
-    model.save_model()
-    print('save done')
+    # model.save_model()
+    # print('save done')
     # model.load_model()
     # print('load done')

@@ -60,7 +60,7 @@ class Niryo(Env):
 
     def step(self, step_vector):
         """
-        Pass a vector of length 14
+        Pass a vector of length 14 or an integer between 0 and 13
         [x+, x-, y+, y-, z+, z-, row+, row-, pitch+, pitch-, yaw+, yaw-, gripper+, gripper-] 
         vector to go to pose
         which will be add delta to it if it's positive or deduct by delta if negative
@@ -73,6 +73,8 @@ class Niryo(Env):
 
         return obs, reward, done, info
         """
+        if isinstance(step_vector, int):
+            step_vector =  self.action_space.action[step_vector]
         delta = 0.1 #adjustable distance input
         delta_angle = 0.5 # TODO could have another number for angle
         delta_gripper = 1.2 # TODO have number for gripper
@@ -114,6 +116,14 @@ class Niryo(Env):
         """
         self.reset_pose()
         self.world.reset()
+        return self.get_obs()
+
+    def reset_pose(self):
+        # starting joint state
+        joints = [-4.00038318737e-05, -0.00169649498877, -0.00135103272703, 1.82992589703e-05, -0.0005746965517, 7.78535278902e-05]
+        self.arm.command.go_to_joint_state(joints)
+        self.gripper.grab_angle(0)
+        return self.get_obs()
 
     def go_to_pose(self, pos_x = 0, pos_y= 0, pos_z = 0, ori_x = 0, ori_y = 0, ori_z = 0, ori_w = 0):
         self.arm.command.go_to_pose_goal(pos_x, pos_y, pos_z, ori_x, ori_y, ori_z, ori_w)
@@ -125,6 +135,7 @@ class Niryo(Env):
         TODO: penalized for how off the orientation of pillow is to goal oritation
         TODO: penalized for getting to deep into the bed (or don't touch bed at all, terminate if it does) or if hit bedframe
         TODO: ?maybe give high reward for placing pillow in correct pose and orientation witin threshold
+        TODO: check for error in step, if can't find that path, should give negative reward
         '''
         def dist_penalty():
             goal = self.world.goal_pose
