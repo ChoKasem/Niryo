@@ -18,19 +18,29 @@ gamma = 0.98
 buffer_limit = 50000
 batch_size = 32
 
-def train(q, q_target, memory, optimizer):
+def train(Q, Q_target, memory, optimizer):
     for i in range(10):
         s, a, r, s_prime, done_mask = memory.sample(5)
+        rgb, joint, pillow, goal, gripper = concat_obs(s)
+        q_out = Q(rgb, joint, pillow, goal, gripper)
+        a = torch.tensor(a)
+        a = torch.reshape(a , (-1,1))
+        # print("Q_out", q_out)
+        q_a = q_out.gather(1, a)
+        # print("q_a", q_a)
+        rgb_p, joint_p, pillow_p, goal_p, gripper_p = concat_obs(s_prime)
+        q_out_p = Q_target(rgb_p, joint_p, pillow_p, goal_p, gripper_p)
+        target = torch.tensor(r) + gamma * q_out_p.max(1)[0] * torch.tensor(done_mask)
+        target = target.reshape((-1,1))
+        # print("Target:", target)
+        loss = nn.MSELoss()
+        output = loss(target, q_a)
+        # print("loss", output)
 
-        q_out = q.obs_forward(s)
-        q_a = q_out.gather(1,a)
-        max_q_prime = q_target(s_prime).max(1)[0].unsqueeze(1)
-        target = r + gamma * max_q_prime * done_mask
-        loss = F.smooth_l1_loss(q_a, target)
-        
         optimizer.zero_grad()
-        loss.backward()
+        output.backward()
         optimizer.step()
+        print("done training iteration: ", i)
 
 def concat_obs(s_lst):
     rgb, joint, pillow, goal, gripper = torch.tensor([]), torch.tensor([]), torch.tensor([]), torch.tensor([]), torch.tensor([])
@@ -124,7 +134,7 @@ if __name__ == '__main__':
     score = 0.0
     optimizer = optim.Adam(Q.parameters(), lr=learning_rate)
 
-    for n_epi in range(1):
+    for n_epi in range(5):
         # epsilon = max(0.01, 0.08 - 0.01*(n_epi/200)) #Linear annealing from 8% to 1%
         epsilon = 0.8
         s = env.reset()
@@ -142,30 +152,33 @@ if __name__ == '__main__':
             if done:
                 break
 
-        # train(Q,Q_target, memory, optimizer)
+        train(Q,Q_target, memory, optimizer)
+        print("n_episode: ", n_epi)
+        print("Score: ", score)
 
 
-    s, a, r, s_prime, done_mask = memory.sample(5)
-    rgb, joint, pillow, goal, gripper = concat_obs(s)
-    q_out = Q(rgb, joint, pillow, goal, gripper)
-    a = torch.tensor(a)
-    a = torch.reshape(a , (-1,1))
-    print("Q_out", q_out)
-    q_a = q_out.gather(1, a)
-    print("q_a", q_a)
-    rgb_p, joint_p, pillow_p, goal_p, gripper_p = concat_obs(s_prime)
-    q_out_p = Q_target(rgb_p, joint_p, pillow_p, goal_p, gripper_p)
-    target = torch.tensor(r) + gamma * q_out_p.max(1)[0] * torch.tensor(done_mask)
-    target = target.reshape((-1,1))
-    print("Target:", target)
-    loss = nn.MSELoss()
-    output = loss(target, q_a)
-    print("loss", output)
+    # train
+    # s, a, r, s_prime, done_mask = memory.sample(5)
+    # rgb, joint, pillow, goal, gripper = concat_obs(s)
+    # q_out = Q(rgb, joint, pillow, goal, gripper)
+    # a = torch.tensor(a)
+    # a = torch.reshape(a , (-1,1))
+    # print("Q_out", q_out)
+    # q_a = q_out.gather(1, a)
+    # print("q_a", q_a)
+    # rgb_p, joint_p, pillow_p, goal_p, gripper_p = concat_obs(s_prime)
+    # q_out_p = Q_target(rgb_p, joint_p, pillow_p, goal_p, gripper_p)
+    # target = torch.tensor(r) + gamma * q_out_p.max(1)[0] * torch.tensor(done_mask)
+    # target = target.reshape((-1,1))
+    # print("Target:", target)
+    # loss = nn.MSELoss()
+    # output = loss(target, q_a)
+    # print("loss", output)
 
-    optimizer.zero_grad()
-    output.backward()
-    optimizer.step()
-    print("done all process")
+    # optimizer.zero_grad()
+    # output.backward()
+    # optimizer.step()
+    # print("done all process")
 
 
     # print("Printing Obs Concat")
