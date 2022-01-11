@@ -1,9 +1,10 @@
 # Niryo
 
 ## Step to Run
-1. Git clone this directory into a workspace and catkin build
-2. source devel/setup.bash
-3. roslaunch niryo_one_moveit_config bed_making_world.launch
+1. Git clone this repo into the home folder (it will create a Niryo workspace)
+2. cd into the Niryo folder and catkin build
+3. type source devel/setup.bash into terminal
+4. roslaunch niryo_one_moveit_config bed_making_world.launch
 
 ## Requirements
 ```
