@@ -74,7 +74,7 @@ def concat_obs(s_lst):
            torch.tensor(pillow), torch.tensor(goal), torch.tensor(gripper)
 
 # if __name__ == '__main__':
-def main_func():
+def minimal_rl():
     print("Inside DQN_train.py")
     rospy.loginfo("Initialize Niryo RL Node")
     rospy.init_node('DQN_Train_Test_Node',
@@ -130,6 +130,7 @@ if __name__ == '__main__':
     memory = ReplayBuffer()
     Q = DQN_model(3,6,14)
     Q_target = DQN_model(3,6,14)
+    print_interval = 1
 
     score = 0.0
     optimizer = optim.Adam(Q.parameters(), lr=learning_rate)
@@ -141,7 +142,7 @@ if __name__ == '__main__':
         done = False
         # print(s.rgb.size(), s.pillow.size(), s.goal.size(), s.joint.size(), s.gripper.size())
 
-        for i in range(7):
+        for i in range(10): #change this to while not done
             a = Q.sample_action(s,epsilon)
             s_prime, r, done, info = env.step(a)
             done_mask = 0.0 if done else 1.0
@@ -152,10 +153,16 @@ if __name__ == '__main__':
             if done:
                 break
 
-        train(Q,Q_target, memory, optimizer)
-        print("n_episode: ", n_epi)
-        print("Score: ", score)
+        if memory.size() > 7: #modify this number as desired
+            train(Q,Q_target, memory, optimizer)
 
+        if n_epi%print_interval == 0 and n_epi!=0:
+            Q_target.load_state_dict(Q.state_dict())
+            Q_target.save_model()
+            print("n_episode: ", n_epi)
+            print("Score: ", score)
+            score = 0.0
+            
 
     # train
     # s, a, r, s_prime, done_mask = memory.sample(5)

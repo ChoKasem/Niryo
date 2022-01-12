@@ -109,7 +109,7 @@ class DQN_model(nn.Module):
             return out.argmax().item()
 
     def save_model(self):
-        torch.save(self.state_dict(), '../save_model/' + self.savefile)
+        torch.save(self.state_dict(), 'save_model/' + self.savefile)
 
     def load_model(self, PATH):
         self.load_state_dict(torch.load(PATH))
