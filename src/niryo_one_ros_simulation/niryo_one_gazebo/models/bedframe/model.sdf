@@ -42,6 +42,12 @@
         </material>
       </visual>
 
+      <sensor name='my_contact' type='contact'>
+        <contact>
+          <collision>box_collision</collision>
+        </contact>
+      </sensor>
+
     </link>
   </model>
 </sdf>

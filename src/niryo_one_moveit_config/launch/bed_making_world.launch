@@ -31,6 +31,8 @@
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find niryo_one_gazebo)/worlds/bed_making.world"/>
     <!-- more default parameters can be changed here -->
+    <!-- Turn on comment below to turn off Gazebo GUI (ie we won't see Gazebo window) -->
+    <arg name="gui" value="false"/>
   </include>
 
   <!-- <?ignore -->
@@ -87,10 +89,11 @@
   </include>
 
   <!-- Run Rviz and load the default config to see the state of the move_group node -->
-  <include file="$(find niryo_one_moveit_config)/launch/moveit_rviz.launch">
+  <!-- Unccoment the inclue below to show rviz -->
+  <!-- <include file="$(find niryo_one_moveit_config)/launch/moveit_rviz.launch">
     <arg name="config" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
-  </include>
+  </include> -->
 
   <!-- If database loading was enabled, start mongodb as well -->
   <include file="$(find niryo_one_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)">
