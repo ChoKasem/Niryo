@@ -9,7 +9,7 @@ pillow = {'init_x' : 0.38, 'init_y' : -0.05, 'init_z':0.19,
          'lower_x' : 2.3, 'lower_y' : 4.3, 'lower_z': 2,
          'upper_x' : 5, 'upper_y' : 4.4, 'upper_z' : 4}
 
-goal = {'init_x' : 3, 'init_y' : 4, 'init_z':2,
+goal = {'init_x' : 1, 'init_y' : 4, 'init_z':2,
          'lower_x' : 2.3, 'lower_y' : 4.3, 'lower_z': 2,
          'upper_x' : 5, 'upper_y' : 4.4, 'upper_z' : 4}
 
