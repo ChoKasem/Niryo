@@ -116,6 +116,8 @@ class Niryo(Env):
         """
         self.reset_pose()
         self.world.reset()
+        # respawn pillow
+        # respawn goal
         return self.get_obs()
 
     def reset_pose(self):

@@ -1,9 +1,17 @@
 import numpy as np
 import rospy
-from gazebo_msgs.srv import GetModelState, SpawnModel
+from gazebo_msgs.srv import GetModelState, SpawnModel, DeleteModel
 from geometry_msgs.msg import *
 import tf
 from std_srvs.srv import Empty
+
+pillow = {'init_x' : 0.38, 'init_y' : -0.05, 'init_z':0.19,
+         'lower_x' : 2.3, 'lower_y' : 4.3, 'lower_z': 2,
+         'upper_x' : 5, 'upper_y' : 4.4, 'upper_z' : 4}
+
+goal = {'init_x' : 3, 'init_y' : 4, 'init_z':2,
+         'lower_x' : 2.3, 'lower_y' : 4.3, 'lower_z': 2,
+         'upper_x' : 5, 'upper_y' : 4.4, 'upper_z' : 4}
 
 class World:
     def __init__(self):
@@ -124,15 +132,26 @@ class World:
         # if random==True:
             # TODO Add randomize goal and pillow spawning
 
+
         rospy.wait_for_service('gazebo/spawn_sdf_model')
         spawn_model_prox = rospy.ServiceProxy('gazebo/spawn_sdf_model', SpawnModel)
         spawn_model_prox("pillow", sdff, "", initial_pose, "world")
+    
+    def delete_model(self, model):
+        print("deleting")
+        try:
+            delete_model = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
+            resp_delete = delete_model(model.lower())
+        except rospy.ServiceException as e:
+            print("Delete Model service call failed: {0}")
 
 if __name__ == '__main__':
     print("Inside world.py")
     world = World()
+    print(test_var)
     # world.reset()
     # print(world.get_model_state("niryo_one"))
-    # world.spawn("Pillow", 0.4, -0.15, .2, 0 ,0,0)
+    world.spawn("Pillow", 0.4, -0.15, .2, 0 ,0,0)
     raw_input()
-    world.check_bed_movement()
+    world.delete_model("pillow")
+    # world.check_bed_movement()

@@ -32,7 +32,7 @@
     <arg name="world_name" value="$(find niryo_one_gazebo)/worlds/bed_making.world"/>
     <!-- more default parameters can be changed here -->
     <!-- Turn on comment below to turn off Gazebo GUI (ie we won't see Gazebo window) -->
-    <arg name="gui" value="false"/>
+    <!-- <arg name="gui" value="false"/> -->
   </include>
 
   <!-- <?ignore -->
