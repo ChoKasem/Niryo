@@ -101,7 +101,7 @@ class World:
         # print(state.pose.position.z)
         return state.pose.position.z
 
-    def spawn(self, model, x, y, z, row, pitch, yaw, random=False):
+    def spawn(self, model, x=None, y=None, z=None, row=None, pitch=None, yaw=None, random=False):
         '''
         Spawn SDF Model
 
@@ -117,9 +117,22 @@ class World:
         
         if model.lower() == "pillow":
             f = open('/home/joker/Niryo/src/niryo_one_ros_simulation/niryo_one_gazebo/models/pillow/model.sdf','r')
+            model_data = pillow
         elif model.lower() == "goal":
             f = open('/home/joker/Niryo/src/niryo_one_ros_simulation/niryo_one_gazebo/models/goal/model.sdf','r')
-        #if goal
+            model_data = goal
+        if x==None:
+            x = model_data['init']['x']
+        if y==None:
+            y = model_data['init']['y']
+        if z==None:
+            z = model_data['init']['z']
+        if row==None:
+            row = model_data['init']['row']
+        if pitch==None:
+            pitch = model_data['init']['pitch']
+        if yaw==None:
+            yaw = model_data['init']['yaw']
         initial_pose = Pose()
         q = tf.transformations.quaternion_from_euler(row, pitch, yaw)
         initial_pose.position.x = x
@@ -137,7 +150,7 @@ class World:
 
         rospy.wait_for_service('gazebo/spawn_sdf_model')
         spawn_model_prox = rospy.ServiceProxy('gazebo/spawn_sdf_model', SpawnModel)
-        spawn_model_prox("pillow", sdff, "", initial_pose, "world")
+        spawn_model_prox(model.lower(), sdff, "", initial_pose, "world")
     
     def delete_model(self, model):
         print("deleting")
@@ -150,10 +163,9 @@ class World:
 if __name__ == '__main__':
     print("Inside world.py")
     world = World()
-    print(test_var)
     # world.reset()
     # print(world.get_model_state("niryo_one"))
-    world.spawn("Pillow", 0.4, -0.15, .2, 0 ,0,0)
+    world.spawn("Pillow")
     raw_input()
-    world.delete_model("pillow")
+    world.spawn("goal")
     # world.check_bed_movement()
