@@ -6,13 +6,13 @@ import tf
 from std_srvs.srv import Empty
 
 pillow = {'init' : {'x' : 0.38, 'y': -0.05, 'z' : 0.19, 'row' : 0, 'pitch'  : 0, 'yaw' : 1.57},
-          'lower_lim': {'x' : 0.0, 'y': -1, 'z' : 0.3, 'row' : 0, 'pitch' : 0, 'yaw' : 0},
-          'upper_lim': {'x' : 2.56, 'y': -0.05, 'z' : 0.2, 'row' : 0, 'pitch' : 0, 'yaw' : 1.57}
+          'lower_lim': {'x' : 0.25, 'y': -0.14, 'z' : 0.19, 'row' : 0, 'pitch' : 0, 'yaw' : -1.57},
+          'upper_lim': {'x' : 0.38, 'y': 0.2, 'z' : 0.19, 'row' : 0, 'pitch' : 0, 'yaw' : 1.57}
           }
 
 goal = {'init' : {'x' : 0.4, 'y': 0.2, 'z' : 0.12, 'row' : 0, 'pitch'  : 0, 'yaw' : 0},
-        'lower_lim': {'x' : 0.0, 'y': -1, 'z' : 0.3, 'row' : 0, 'pitch' : 0, 'yaw' : 0},
-        'upper_lim': {'x' : 2.56, 'y': -0.05, 'z' : 0.2, 'row' : 0, 'pitch' : 0, 'yaw' : 1.57}
+        'lower_lim': {'x' : 0.25, 'y': -0.14, 'z' : 0.19, 'row' : 0, 'pitch' : 0, 'yaw' : -1.57},
+        'upper_lim': {'x' : 0.38, 'y': 0.2, 'z' : 0.19, 'row' : 0, 'pitch' : 0, 'yaw' : 1.57}
         }
 
 class World:
@@ -32,13 +32,18 @@ class World:
 
     def reset(self, random = False):
         # remove bed and pillow and respawn them
-        # TODO: Add randomize spawing (in spawn, and just call it)
         rospy.wait_for_service('/gazebo/reset_world')
-        try:
-            self.reset_gazebo_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
-        except rospy.ServiceException as e:
-            print("Service call failed: %s"%e)
-        self.reset_gazebo_world()
+        if random == True:
+            self.delete_model("Pillow")
+            self.delete_model("Goal")
+            self.spawn("Pillow")
+            self.spawn("Goal")
+        else:    
+            try:
+                self.reset_gazebo_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
+            except rospy.ServiceException as e:
+                print("Service call failed: %s"%e)
+        # self.reset_gazebo_world()
 
     def check_bed_movement(self):
         ''' TODO: find a way to get difference between two Pose()
@@ -133,6 +138,16 @@ class World:
             pitch = model_data['init']['pitch']
         if yaw==None:
             yaw = model_data['init']['yaw']
+        
+        if random==True:
+            x = np.random.uniform(model_data['lower_lim']['x'], model_data['upper_lim']['x'])
+            y = np.random.uniform(model_data['lower_lim']['y'], model_data['upper_lim']['y'])
+            z = np.random.uniform(model_data['lower_lim']['z'], model_data['upper_lim']['z'])
+            row = np.random.uniform(model_data['lower_lim']['row'], model_data['upper_lim']['row'])
+            pitch = np.random.uniform(model_data['lower_lim']['pitch'], model_data['upper_lim']['pitch'])
+            yaw = np.random.uniform(model_data['lower_lim']['yaw'], model_data['upper_lim']['yaw'])
+            # TODO Add randomize goal and pillow spawning
+
         initial_pose = Pose()
         q = tf.transformations.quaternion_from_euler(row, pitch, yaw)
         initial_pose.position.x = x
@@ -143,11 +158,6 @@ class World:
         initial_pose.orientation.z = q[2]
         initial_pose.orientation.w = q[3]
         sdff = f.read()
-
-        # if random==True:
-            # TODO Add randomize goal and pillow spawning
-
-
         rospy.wait_for_service('gazebo/spawn_sdf_model')
         spawn_model_prox = rospy.ServiceProxy('gazebo/spawn_sdf_model', SpawnModel)
         spawn_model_prox(model.lower(), sdff, "", initial_pose, "world")
@@ -165,7 +175,11 @@ if __name__ == '__main__':
     world = World()
     # world.reset()
     # print(world.get_model_state("niryo_one"))
-    world.spawn("Pillow")
-    raw_input()
-    world.spawn("goal")
+    # world.spawn("Pillow", 0.38, 0.2, 0.19, 0, 0, 0)
+    # world.spawn("Pillow", random=True)
+    # world.spawn("goal", random=True)
+    # raw_input()
+    # world.delete_model("Pillow")
+    # world.delete_model("goal")
     # world.check_bed_movement()
+    world.reset()
