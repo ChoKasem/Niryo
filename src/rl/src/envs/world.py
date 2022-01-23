@@ -5,13 +5,15 @@ from geometry_msgs.msg import *
 import tf
 from std_srvs.srv import Empty
 
-pillow = {'init_x' : 0.38, 'init_y' : -0.05, 'init_z':0.19,
-         'lower_x' : 2.3, 'lower_y' : 4.3, 'lower_z': 2,
-         'upper_x' : 5, 'upper_y' : 4.4, 'upper_z' : 4}
+pillow = {'init' : {'x' : 0.38, 'y': -0.05, 'z' : 0.19, 'row' : 0, 'pitch'  : 0, 'yaw' : 1.57},
+          'lower_lim': {'x' : 0.0, 'y': -1, 'z' : 0.3, 'row' : 0, 'pitch' : 0, 'yaw' : 0},
+          'upper_lim': {'x' : 2.56, 'y': -0.05, 'z' : 0.2, 'row' : 0, 'pitch' : 0, 'yaw' : 1.57}
+          }
 
-goal = {'init_x' : 1, 'init_y' : 4, 'init_z':2,
-         'lower_x' : 2.3, 'lower_y' : 4.3, 'lower_z': 2,
-         'upper_x' : 5, 'upper_y' : 4.4, 'upper_z' : 4}
+goal = {'init' : {'x' : 0.4, 'y': 0.2, 'z' : 0.12, 'row' : 0, 'pitch'  : 0, 'yaw' : 0},
+        'lower_lim': {'x' : 0.0, 'y': -1, 'z' : 0.3, 'row' : 0, 'pitch' : 0, 'yaw' : 0},
+        'upper_lim': {'x' : 2.56, 'y': -0.05, 'z' : 0.2, 'row' : 0, 'pitch' : 0, 'yaw' : 1.57}
+        }
 
 class World:
     def __init__(self):
