@@ -142,6 +142,7 @@ class Niryo(Env):
             goal = self.world.goal_pose
             current = self.world.pillow_pose
             sparse_reward_amount = 100
+            scale_factor = 100
             # print("Goal")
             # print(goal)
             # print("Current")
@@ -156,13 +157,13 @@ class Niryo(Env):
                     if dist < distance_threshold:
                         return sparse_reward_amount
                     else:
-                        return -sparse_reward_amount -dist
+                        return -sparse_reward_amount -dist*scale_factor
                 else:
                     return 0
             else:
                 # dense reward give feedback from every action
                 print("Dense Reward Calc")
-                return -dist
+                return -dist*scale_factor
         touch_mattress_penalty = 0
         touch_bedframe_penalty = 0
         end_eff_pose = self.arm.get_end_effector_pose()
