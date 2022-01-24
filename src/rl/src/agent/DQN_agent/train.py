@@ -126,7 +126,7 @@ if __name__ == '__main__':
     rospy.loginfo("Initialize Niryo RL Node")
     rospy.init_node('DQN_Train_Test_Node',
                     anonymous=True)
-    env = Niryo()
+    env = Niryo(randomspawn=True)
     memory = ReplayBuffer()
     Q = DQN_model(3,6,14)
     Q_target = DQN_model(3,6,14)

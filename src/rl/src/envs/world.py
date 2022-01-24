@@ -18,31 +18,32 @@ goal = {'init' : {'x' : 0.4, 'y': 0.2, 'z' : 0.12, 'row' : 0, 'pitch'  : 0, 'yaw
 class World:
     def __init__(self):
         rospy.sleep(1)
-        self.available_model = ["Pillow", "Goal", "Bed", "BedFrame", "niryo_one"]
-        self.pillow_pose = self.get_model_state("Pillow")
-        self.goal_pose = self.get_model_state("Goal")
+        self.available_model = ["pillow", "goal", "Bed", "BedFrame", "niryo_one"]
+        self.pillow_pose = self.get_model_state("pillow")
+        self.goal_pose = self.get_model_state("goal")
         self.bed_pose = self.get_model_state("Bed")
         self.bedframe_pose = self.get_model_state("BedFrame")
 
     def update_world_state(self):
-        self.pillow_pose = self.get_model_state("Pillow")
-        self.goal_pose = self.get_model_state("Goal")
+        self.pillow_pose = self.get_model_state("pillow")
+        self.goal_pose = self.get_model_state("goal")
         self.bed_pose = self.get_model_state("Bed")
         self.bedframe_pose = self.get_model_state("BedFrame")
 
     def reset(self, random = False):
         # remove bed and pillow and respawn them
         rospy.wait_for_service('/gazebo/reset_world')
-        if random == True:
-            self.delete_model("Pillow")
-            self.delete_model("Goal")
-            self.spawn("Pillow")
-            self.spawn("Goal")
-        else:    
-            try:
-                self.reset_gazebo_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
-            except rospy.ServiceException as e:
-                print("Service call failed: %s"%e)
+        
+        self.delete_model("pillow")
+        self.delete_model("goal")
+        self.spawn("pillow", random=random)
+        self.spawn("goal", random=random)
+        self.update_world_state()
+           
+        try:
+            self.reset_gazebo_world = rospy.ServiceProxy('/gazebo/reset_world', Empty)
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)
         # self.reset_gazebo_world()
 
     def check_bed_movement(self):
@@ -68,7 +69,7 @@ class World:
     def pillow_move(self):
         # if pillow doesn't move, return 0
         # if pillow move, calculate reward
-        new_pose = self.get_model_state("Pillow")
+        new_pose = self.get_model_state("pillow")
         if new_pose == self.pillow_pose:
             return False
 
@@ -77,7 +78,7 @@ class World:
             return True
 
     def pillow_move_up(self):
-        if np.abs(self.get_height("Pillow") - self.pillow_z) > 0.01:
+        if np.abs(self.get_height("pillow") - self.pillow_z) > 0.01:
             return True
         return False
     

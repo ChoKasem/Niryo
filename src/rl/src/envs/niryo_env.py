@@ -23,15 +23,11 @@ class Niryo(Env):
         reward_range: A tuple corresponding to the min and max possible rewards
     """
 
-    # TODO: modify these to match base_env
-
-        
-
     num_joints = 12
     rgb_img_shape = (480, 640, 3)
     depth_img_shape = (480, 640, 1)
 
-    def __init__(self, reward_type = 'dense', distance_threshold = 0.05):
+    def __init__(self, reward_type = 'dense', distance_threshold = 0.05, randomspawn = False):
 
         """Initializes a new Fetch environment.
         Args:
@@ -46,7 +42,6 @@ class Niryo(Env):
         super(Niryo, self).__init__()
         self.action_space.n = 14
         self.action_space.action = np.identity(14)
-        # self.action_space.sample()
 
         # parts of robot
         self.arm = Arm()            
@@ -54,9 +49,13 @@ class Niryo(Env):
         self.world = World()
         self.done = False
         self.info = None
+        self.randomspawn = randomspawn
 
-        self.reward_type = reward_type
+
+        self.reward_type = reward_type.lower()
         self.distance_threshold = distance_threshold
+
+        print("Niryo Env created: Reward Type = ", self.reward_type, ", Distance Threshold = ", self.distance_threshold, ", Random Spawn = ", self.randomspawn)
 
     def step(self, step_vector):
         """
@@ -115,7 +114,7 @@ class Niryo(Env):
             observation (object): the initial observation.
         """
         self.reset_pose()
-        self.world.reset()
+        self.world.reset(random=self.randomspawn)
         return self.get_obs()
 
     def reset_pose(self):
@@ -137,17 +136,32 @@ class Niryo(Env):
         TODO: ?maybe give high reward for placing pillow in correct pose and orientation witin threshold
         TODO: check for error in step, if can't find that path, should give negative reward
         '''
-        def dist_penalty():
+        self.world.update_world_state()
+        
+        def dist_reward():
             goal = self.world.goal_pose
             current = self.world.pillow_pose
+            sparse_reward_amount = 100
             # print("Goal")
             # print(goal)
             # print("Current")
             # print(current)
+
+            # reward (ie penalty) according to the distance between pillow and goal
             dist = np.sqrt((goal.pose.position.x - current.pose.position.x) ** 2 + (goal.pose.position.y - current.pose.position.y) ** 2 + (goal.pose.position.z - current.pose.position.z) ** 2)
             if self.reward_type == 'sparse':
-                return -(dist > self.distance_threshold).astype(np.float32)
+                # sparse reward give huge reward when episode end 
+                print("Sparse Reward Calc")
+                if self.done == True:
+                    if dist < distance_threshold:
+                        return sparse_reward_amount
+                    else:
+                        return -sparse_reward_amount -dist
+                else:
+                    return 0
             else:
+                # dense reward give feedback from every action
+                print("Dense Reward Calc")
                 return -dist
         touch_mattress_penalty = 0
         touch_bedframe_penalty = 0
@@ -161,7 +175,9 @@ class Niryo(Env):
             touch_bedframe_penalty = -20
             self.done = True
         
-        return dist_penalty() + touch_mattress_penalty + touch_bedframe_penalty
+        total_reward = dist_reward() + touch_mattress_penalty + touch_bedframe_penalty
+        print("Total Reward is: ", total_reward)
+        return total_reward
 
     def get_obs(self):
         state = ObservationSpace(self.arm.image, self.world.pillow_pose.pose, self.world.goal_pose.pose, self.arm.joint_angle.position[:6], self.gripper.gripper_angle)
@@ -172,7 +188,7 @@ if __name__ == '__main__':
     rospy.loginfo("Initialize Niryo RL Node")
     rospy.init_node('Niryo_Env_Test_Node',
                     anonymous=True)
-    niryo = Niryo()
+    # niryo = Niryo()
     # print(niryo.action_space.sample())
     # print("ready to move")
     # niryo.step(niryo.action_space.action[6])
@@ -196,3 +212,14 @@ if __name__ == '__main__':
     # print(obs.goal)
     # print(obs.joint)
     # print(obs.gripper)
+
+    niryo = Niryo(randomspawn=True)
+    print("ready to move")
+    niryo.reset()
+    raw_input()
+    niryo.reset()
+    raw_input()
+    niryo.reset()
+    raw_input()
+    # niryo.step(niryo.action_space.sample())
+    
