@@ -122,10 +122,10 @@ class World:
         '''
         
         if model.lower() == "pillow":
-            f = open('/home/joker/Niryo/src/niryo_one_ros_simulation/niryo_one_gazebo/models/pillow/model.sdf','r')
+            f = open('/home/jok/Niryo/src/niryo_one_ros_simulation/niryo_one_gazebo/models/pillow/model.sdf','r')
             model_data = pillow
         elif model.lower() == "goal":
-            f = open('/home/joker/Niryo/src/niryo_one_ros_simulation/niryo_one_gazebo/models/goal/model.sdf','r')
+            f = open('/home/jok/Niryo/src/niryo_one_ros_simulation/niryo_one_gazebo/models/goal/model.sdf','r')
             model_data = goal
         if x==None:
             x = model_data['init']['x']
