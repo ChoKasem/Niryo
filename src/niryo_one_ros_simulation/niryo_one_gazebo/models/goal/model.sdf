@@ -1,14 +1,15 @@
 <?xml version='1.0'?>
 <sdf version="1.4">
-  <model name="Goal">
+  <model name="goal">
     <pose>0 0 0.0 0 0 0</pose>
     <static>true</static>
 
-    <link name="link">
-      <visual name="visual">
+    <link name="goal">
+      <visual name="x">
+        <pose>0.1 0 0 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.05 0.05 0.05</size>
+            <size>0.2 0.02 0.02</size>
           </box>
         </geometry>
         <material>
@@ -18,6 +19,37 @@
           <emissive>0 0 0 0</emissive>
         </material>
       </visual>
+
+      <visual name="y">
+        <pose>0 0.1 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.02 0.2 0.02</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0 1 0 1</ambient>
+          <diffuse>0 1 0 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+          <emissive>0 0 0 0</emissive>
+        </material>
+      </visual>
+
+      <visual name="z">
+        <pose>0 0 0.1 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.02 0.02 0.2</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0 0 1 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+          <emissive>0 0 0 0</emissive>
+        </material>
+      </visual>
+
     </link>
   </model>
 </sdf>

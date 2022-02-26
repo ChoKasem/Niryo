@@ -89,11 +89,12 @@
   </include>
 
   <!-- Run Rviz and load the default config to see the state of the move_group node -->
-  <!-- Uncomment the inclue below to show rviz -->
-  <include file="$(find niryo_one_moveit_config)/launch/moveit_rviz.launch">
+  <!-- Uncomment the inclue below to show RVIZ / or comment it to hide RVIZ-->
+  
+  <!-- <include file="$(find niryo_one_moveit_config)/launch/moveit_rviz.launch">
     <arg name="config" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
-  </include>
+  </include> -->
 
   <!-- If database loading was enabled, start mongodb as well -->
   <include file="$(find niryo_one_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)">
