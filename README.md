@@ -8,7 +8,10 @@
 
 ## Requirements
 ```
-install pip if you don't have it already
+install pip if you don't have it already with
+sudo apt-get install python-pi
+
+Do not update pip if it said it's an old version on Ubuntu as it is not statble for newer version of pip. This may cause the pip system to fail and you may have to reinstall Ubuntu
 
 pip install torch
 
@@ -27,4 +30,17 @@ ros-control*
 control*
 trajectory*
 gazebo*
+```
+
+
+
+Run this command to start the simulation
+
+```
+roslaunch niryo_one_moveit_config bed_making_world.launch 
+```
+
+Then to train the model, go to the agent folder of RL algorithm agent you want to test and run
+```
+python train.py
 ```
