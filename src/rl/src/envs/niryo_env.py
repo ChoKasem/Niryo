@@ -130,7 +130,7 @@ class Niryo(Env):
 
     def compute_reward(self):
         '''
-        Compute the Reward, composing of # terms
+        Compute the Reward, composing of 4 terms
         1) dist_penalty : penalize distance proportion to distance between goal and pillow
         TODO: penalized for how off the orientation of pillow is to goal oritation
         TODO: penalized for getting to deep into the bed (or don't touch bed at all, terminate if it does) or if hit bedframe
