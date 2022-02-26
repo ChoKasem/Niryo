@@ -135,7 +135,7 @@ class Niryo(Env):
         TODO: penalized for how off the orientation of pillow is to goal oritation
         TODO: penalized for getting to deep into the bed (or don't touch bed at all, terminate if it does) or if hit bedframe
         TODO: ?maybe give high reward for placing pillow in correct pose and orientation witin threshold
-        TODO: check for error in step, if can't find that path, should give negative reward
+        : check for error in step, if can't find that path, should give negative reward
         '''
         self.world.update_world_state()
         
@@ -149,6 +149,9 @@ class Niryo(Env):
             # print("Current")
             # print(current)
 
+        # Main Reward and Penalty
+        # Reward for moving the pillow witihin threshold distance of the goal
+        # Penalty otherwise proportion the the distance between pillow and goal
             # reward (ie penalty) according to the distance between pillow and goal
             dist = np.sqrt((goal.pose.position.x - current.pose.position.x) ** 2 + (goal.pose.position.y - current.pose.position.y) ** 2 + (goal.pose.position.z - current.pose.position.z) ** 2)
             if self.reward_type == 'sparse':
@@ -168,15 +171,18 @@ class Niryo(Env):
         touch_mattress_penalty = 0
         touch_bedframe_penalty = 0
         end_eff_pose = self.arm.get_end_effector_pose()
+        
+        # Penalty for touching the mattrss (by going lower than specify height)
         if end_eff_pose.position.z < 0.119:
             touch_matress_penalty = -15
             self.done = True
 
-
+        # Penalty for trying to move to far and touch bedframe (going toward the left too much)
         if end_eff_pose.position.y > 0.2870:
             touch_bedframe_penalty = -20
             self.done = True
-
+        
+        # Penalty for trying to go outside workspace of robot
         path_planning_penalty = 0
         if self.planningstate.state_status != 3: #if no solution is found
             print(self.planningstate.state_text)
