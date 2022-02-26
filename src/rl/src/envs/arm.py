@@ -2,6 +2,7 @@ import rospy
 from cv_bridge import CvBridge, CvBridgeError
 from control_msgs.msg import GripperCommandActionGoal
 from sensor_msgs.msg import JointState, Image
+from actionlib_msgs.msg import GoalStatus, GoalStatusArray
 from std_msgs.msg import String
 from gazebo_msgs.srv import GetModelState, SpawnModel
 from geometry_msgs.msg import *
@@ -83,15 +84,49 @@ class Gripper:
         self.gripper_angle = angle
         self.gripper_pub.publish(gripperGoal)
 
+class PlanningState:
+    def __init__(self):
+        '''
+        contain state of planning
+        uint8 PENDING=0
+        uint8 ACTIVE=1
+        uint8 PREEMPTED=2
+        uint8 SUCCEEDED=3
+        uint8 ABORTED=4
+        uint8 REJECTED=5
+        uint8 PREEMPTING=6
+        uint8 RECALLING=7
+        uint8 RECALLED=8
+        uint8 LOST=9
+        '''
+        self.state_status = 0
+        self.state_text = ''
+        planning_state_sub = rospy.Subscriber("/move_group/status", GoalStatusArray, self.check_status_cb)
+    
+    def check_status_cb(self,msg):
+        # print(msg)
+        # print("Status Number")
+        # print(msg.status_list[0].status)        
+        # print(msg.status_list[0].text)
+        self.state_status = msg.status_list[0].status
+        self.state_text = msg.status_list[0].text
+
+
+        
+
+
+
 if __name__ == '__main__':
     print("Inside arm.py")
     rospy.loginfo("Initialize Niryo RL Node")
     rospy.init_node('Arm_Test_Node',
                     anonymous=True)
     arm = Arm()
+    planning_state = PlanningState()
     print("Moving Arm")
     arm.command.go_to_pose_goal(0.350840341432, -0.058138712168, 0.276432223498, 0.50174247142, 0.501506407284, 0.498433947182, 0.498306548344)
-    print("Printing Arm Joint Angle")
-    print(arm.joint_angle)
-    print("Printing end effector pose")
-    print(arm.get_end_effector_pose())
+
+    # print("Printing Arm Joint Angle")
+    # print(arm.joint_angle)
+    # print("Printing end effector pose")
+    # print(arm.get_end_effector_pose())

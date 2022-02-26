@@ -3,7 +3,7 @@ import numpy as np
 import tf
 import torch
 
-from arm import Arm, Gripper
+from arm import Arm, Gripper, PlanningState
 from world import World
 from base_env import Env, ActionSpace, ObservationSpace
 
@@ -47,6 +47,7 @@ class Niryo(Env):
         self.arm = Arm()            
         self.gripper = Gripper()
         self.world = World()
+        self.planningstate = PlanningState()
         self.done = False
         self.info = None
         self.randomspawn = randomspawn
@@ -175,8 +176,13 @@ class Niryo(Env):
         if end_eff_pose.position.y > 0.2870:
             touch_bedframe_penalty = -20
             self.done = True
+
+        path_planning_penalty = 0
+        if self.planningstate.state_status != 3: #if no solution is found
+            print(self.planningstate.state_text)
+            path_planning_penalty = -1000
         
-        total_reward = dist_reward() + touch_mattress_penalty + touch_bedframe_penalty
+        total_reward = dist_reward() + touch_mattress_penalty + touch_bedframe_penalty + path_planning_penalty
         print("Total Reward is: ", total_reward)
         return total_reward
 
@@ -216,11 +222,19 @@ if __name__ == '__main__':
 
     niryo = Niryo(randomspawn=True)
     print("ready to move")
-    niryo.reset()
+    # niryo.reset()
+    niryo.step(niryo.action_space.action[0])
     raw_input()
-    niryo.reset()
+    niryo.step(niryo.action_space.action[1])
     raw_input()
-    niryo.reset()
+    niryo.step(niryo.action_space.action[1])
     raw_input()
+    niryo.step(niryo.action_space.action[1])
+    raw_input()
+    niryo.step(niryo.action_space.action[1])
+    raw_input()
+    niryo.step(niryo.action_space.action[1])
+    raw_input()
+    niryo.step(niryo.action_space.action[1])
     # niryo.step(niryo.action_space.sample())
     
