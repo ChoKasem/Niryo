@@ -21,7 +21,7 @@
 
     
 <!-- will spawn them once training start -->
-    <include>
+    <!-- <include>
       <pose>0.38 -0.05 0.19 0 0 1.57 </pose>
       <uri>model://pillow</uri>
     </include>
@@ -29,7 +29,7 @@
     <include>
       <pose>0.4 0.2 0.12 0 0 0</pose>
       <uri>model://goal</uri>
-    </include>
+    </include> -->
 
     <!-- uncomment if want trainign to be done in brick room backgrond -->
     <!-- <include>

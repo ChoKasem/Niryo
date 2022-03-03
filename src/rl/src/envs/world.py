@@ -10,25 +10,27 @@ pillow = {'init' : {'x' : 0.38, 'y': -0.05, 'z' : 0.19, 'row' : 0, 'pitch'  : 0,
           'upper_lim': {'x' : 0.38, 'y': 0.2, 'z' : 0.19, 'row' : 0, 'pitch' : 0, 'yaw' : 1.57}
           }
 
-goal = {'init' : {'x' : 0.4, 'y': 0.2, 'z' : 0.12, 'row' : 0, 'pitch'  : 0, 'yaw' : 0},
-        'lower_lim': {'x' : 0.25, 'y': -0.14, 'z' : 0.19, 'row' : 0, 'pitch' : 0, 'yaw' : -1.57},
-        'upper_lim': {'x' : 0.38, 'y': 0.2, 'z' : 0.19, 'row' : 0, 'pitch' : 0, 'yaw' : 1.57}
+goal = {'init' : {'x' : 0.4, 'y': 0.2, 'z' : 0.1, 'row' : 0, 'pitch'  : 0, 'yaw' : 0},
+        'lower_lim': {'x' : 0.25, 'y': -0.14, 'z' : 0.1, 'row' : 0, 'pitch' : 0, 'yaw' : -1.57},
+        'upper_lim': {'x' : 0.38, 'y': 0.2, 'z' : 0.1, 'row' : 0, 'pitch' : 0, 'yaw' : 1.57}
         }
+
+        #without BedFrame, height should be 0.1 (for pillow can leave it at 0.19 cause it will fall due to gravity)
 
 class World:
     def __init__(self):
         rospy.sleep(1)
-        self.available_model = ["pillow", "goal", "Bed", "BedFrame", "niryo_one"]
+        self.available_model = ["pillow", "goal", "Bed", "niryo_one"] #"BedFrame" remove, but can add in if include its model
         self.pillow_pose = self.get_model_state("pillow")
         self.goal_pose = self.get_model_state("goal")
         self.bed_pose = self.get_model_state("Bed")
-        self.bedframe_pose = self.get_model_state("BedFrame")
+        # self.bedframe_pose = self.get_model_state("BedFrame")
 
     def update_world_state(self):
         self.pillow_pose = self.get_model_state("pillow")
         self.goal_pose = self.get_model_state("goal")
         self.bed_pose = self.get_model_state("Bed")
-        self.bedframe_pose = self.get_model_state("BedFrame")
+        # self.bedframe_pose = self.get_model_state("BedFrame")
 
     def reset(self, random = False):
         # remove bed and pillow and respawn them
