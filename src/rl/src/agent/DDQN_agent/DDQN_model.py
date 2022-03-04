@@ -11,9 +11,9 @@ sys.path.append("../..")
 
 from envs import Arm, World, Gripper, Niryo
 
-class DQN_model(nn.Module):
+class DDQN_model(nn.Module):
     def __init__(self, img_ch, num_joint, num_action):
-        super(DQN_model, self).__init__()
+        super(DDQN_model, self).__init__()
         self.num_acition = num_action
         now = datetime.datetime.now()
         self.savefile = str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '-' + str(now.hour) + '-' + str(now.minute) + '.pt'
@@ -120,7 +120,7 @@ def pose2vector(pose):
 
 
 if __name__ == '__main__':
-    print("Inside DQN_model.py")
+    print("Inside DDQN_model.py")
     # rospy.loginfo("Initialize Niryo RL Node")
     # rospy.init_node('DQN_Model_Test_Node',
                     # anonymous=True)
@@ -169,7 +169,7 @@ if __name__ == '__main__':
     goal_pose = torch.randn((1,7))
     gripper = torch.randn((1,1))
 
-    model = DQN_model(3,6,14)
+    model = DDQN_model(3,6,14)
     output = model(img, joint, pillow_pose, goal_pose, gripper)
     print("Model Output")
     print(output)

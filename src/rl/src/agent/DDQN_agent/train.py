@@ -11,7 +11,7 @@ sys.path.append("../..")
 
 from envs import Arm, World, Gripper, Niryo, ActionSpace, ObservationSpace
 from utils.ReplayBuffer import ReplayBuffer
-from DQN_model import *
+from DDQN_model import *
 
 learning_rate = 0.0005
 gamma = 0.98
@@ -25,12 +25,18 @@ def train(Q, Q_target, memory, optimizer):
         q_out = Q(rgb, joint, pillow, goal, gripper)
         a = torch.tensor(a)
         a = torch.reshape(a , (-1,1))
-        # print("Q_out", q_out)
         q_a = q_out.gather(1, a)
-        # print("q_a", q_a)
         rgb_p, joint_p, pillow_p, goal_p, gripper_p = concat_obs(s_prime)
-        q_out_p = Q_target(rgb_p, joint_p, pillow_p, goal_p, gripper_p)
-        target = torch.tensor(r) + gamma * q_out_p.max(1)[0] * torch.tensor(done_mask)
+
+        # choose action base on online network of next state
+        q_out_p = Q(rgb_p, joint_p, pillow_p, goal_p, gripper_p)
+        a_q_out_max = q_out_p.max(1)[1]
+
+        # evaluate the action base on target network
+        q_target_out_p_prob = Q_target(rgb_p, joint_p, pillow_p, goal_p, gripper_p)
+        q_target_out_p = q_target_out_p_prob.gather(1,a_q_out_max.reshape(-1,1))
+        q_target_out_p = q_target_out_p.flatten()
+        target = torch.tensor(r) + gamma * q_target_out_p * torch.tensor(done_mask)
         target = target.reshape((-1,1))
         # print("Target:", target)
         loss = nn.MSELoss()
@@ -74,14 +80,14 @@ def concat_obs(s_lst):
            torch.tensor(pillow), torch.tensor(goal), torch.tensor(gripper)
 
 if __name__ == '__main__':
-    print("Inside DQN_train.py")
+    print("Inside DDQN_train.py")
     rospy.loginfo("Initialize Niryo RL Node")
-    rospy.init_node('DQN_Train_Test_Node',
+    rospy.init_node('DDQN_Train_Test_Node',
                     anonymous=True)
     env = Niryo(randomspawn=True)
     memory = ReplayBuffer()
-    Q = DQN_model(3,6,14)
-    Q_target = DQN_model(3,6,14)
+    Q = DDQN_model(3,6,14)
+    Q_target = DDQN_model(3,6,14)
     print_interval = 1
 
     score = 0.0

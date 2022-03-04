@@ -173,7 +173,7 @@ class Niryo(Env):
         end_eff_pose = self.arm.get_end_effector_pose()
         
         # Penalty for touching the mattrss (by going lower than specify height)
-        if end_eff_pose.position.z < 0.11 #0.119 if with bedframe, but shouldn't be much different and depend on bedframe model (just run arm.py to check end effector pose)
+        if end_eff_pose.position.z < 0.11: #0.119 if with bedframe, but shouldn't be much different and depend on bedframe model (just run arm.py to check end effector pose)
             touch_matress_penalty = -150
             self.done = True
 
