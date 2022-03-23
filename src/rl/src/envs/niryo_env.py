@@ -75,9 +75,9 @@ class Niryo(Env):
         """
         if isinstance(step_vector, int):
             step_vector =  self.action_space.action[step_vector]
-        delta = 0.1 #adjustable distance input
-        delta_angle = 0.5 # TODO could have another number for angle
-        delta_gripper = 1.2 # TODO have number for gripper
+        delta = 0.05 #adjustable distance input
+        delta_angle = 0.3 # could have another number for angle
+        delta_gripper = 1.2 # have number for gripper
         pose = self.arm.get_end_effector_pose()
         # assert step_vector.count(0) == 13 and step_vector.count(1) == 1
         # print(pose)
@@ -173,7 +173,7 @@ class Niryo(Env):
         end_eff_pose = self.arm.get_end_effector_pose()
         
         # Penalty for touching the mattrss (by going lower than specify height)
-        if end_eff_pose.position.z < 0.11: #0.119 if with bedframe, but shouldn't be much different and depend on bedframe model (just run arm.py to check end effector pose)
+        if end_eff_pose.position.z < 0.15: #0.159 if with bedframe, but shouldn't be much different and depend on bedframe model (just run arm.py to check end effector pose)
             touch_matress_penalty = -150
             self.done = True
 

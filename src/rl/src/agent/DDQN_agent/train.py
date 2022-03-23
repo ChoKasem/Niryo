@@ -19,8 +19,8 @@ buffer_limit = 50000
 batch_size = 32
 
 def train(Q, Q_target, memory, optimizer):
-    for i in range(10):
-        s, a, r, s_prime, done_mask = memory.sample(5)
+    for i in range(20):
+        s, a, r, s_prime, done_mask = memory.sample(20)
         rgb, joint, pillow, goal, gripper = concat_obs(s)
         q_out = Q(rgb, joint, pillow, goal, gripper)
         a = torch.tensor(a)
@@ -93,15 +93,16 @@ if __name__ == '__main__':
     score = 0.0
     optimizer = optim.Adam(Q.parameters(), lr=learning_rate)
 
-    for n_epi in range(5):
+    for n_epi in range(50):
         # epsilon = max(0.01, 0.08 - 0.01*(n_epi/200)) #Linear annealing from 8% to 1%
         epsilon = 0.8
         s = env.reset()
         done = False
         # print(s.rgb.size(), s.pillow.size(), s.goal.size(), s.joint.size(), s.gripper.size())
 
-        for i in range(10): #change this to while not done
+        while not done: #change this to while not done
             a = Q.sample_action(s,epsilon)
+            print("Doing action: ", a)
             s_prime, r, done, info = env.step(a)
             done_mask = 0.0 if done else 1.0
             memory.put((s,a,r,s_prime, done_mask))
@@ -111,7 +112,7 @@ if __name__ == '__main__':
             if done:
                 break
 
-        if memory.size() > 7: #modify this number as desired
+        if memory.size() > 50: #modify this number as desired
             train(Q,Q_target, memory, optimizer)
 
         if n_epi%print_interval == 0 and n_epi!=0:
