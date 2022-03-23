@@ -85,17 +85,18 @@ if __name__ == '__main__':
     rospy.init_node('DDQN_Train_Test_Node',
                     anonymous=True)
     env = Niryo(randomspawn=True)
-    memory = ReplayBuffer()
     Q = DDQN_model(3,6,14)
-    Q_target = DDQN_model(3,6,14)
+    Q.load_model('save_model/2022-3-6-10-43.pt')
     print_interval = 1
-
+    print("Load Model Successful")
     score = 0.0
+    total_score = 0.0
     optimizer = optim.Adam(Q.parameters(), lr=learning_rate)
+    
 
-    for n_epi in range(100):
-        # epsilon = max(0.01, 0.08 - 0.01*(n_epi/200)) #Linear annealing from 8% to 1%
-        epsilon = 0.8
+    for n_epi in range(50):
+        # epsilon = max(0.01, 0.08 - 0.01*(n_epi/200)) #Linear annealing from 8% to 1% for when you want epsilon to change with for each episode
+        epsilon = 0.0 #having epsilon of zero mean it will always pick max action
         s = env.reset()
         done = False
         # print(s.rgb.size(), s.pillow.size(), s.goal.size(), s.joint.size(), s.gripper.size())
@@ -104,24 +105,16 @@ if __name__ == '__main__':
             a = Q.sample_action(s,epsilon)
             print("Doing action: ", a)
             s_prime, r, done, info = env.step(a)
-            done_mask = 0.0 if done else 1.0
-            memory.put((s,a,r,s_prime, done_mask))
-            s = s_prime
 
             score += r
             if done:
                 break
 
-        if memory.size() > 50: #modify this number as desired
-            train(Q,Q_target, memory, optimizer)
-
         if n_epi%print_interval == 0 and n_epi!=0:
-            Q_target.load_state_dict(Q.state_dict())
-            Q_target.save_model()
             print("n_episode: ", n_epi)
             print("Score: ", score)
+            print("Total_Score: ", total_score)
+            total_score += score
             score = 0.0
-            
-
    
     print("Done")

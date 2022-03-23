@@ -87,7 +87,7 @@ def minimal_rl():
     score = 0.0
     optimizer = optim.Adam(Q.parameters(), lr=learning_rate)
 
-    for n_epi in range(1):
+    for n_epi in range(100):
         epsilon = max(0.01, 0.08 - 0.01*(n_epi/200)) #Linear annealing from 8% to 1%
         s = env.reset()
         done = False
@@ -135,14 +135,14 @@ if __name__ == '__main__':
     score = 0.0
     optimizer = optim.Adam(Q.parameters(), lr=learning_rate)
 
-    for n_epi in range(5):
+    for n_epi in range(100):
         # epsilon = max(0.01, 0.08 - 0.01*(n_epi/200)) #Linear annealing from 8% to 1%
         epsilon = 0.8
         s = env.reset()
         done = False
         # print(s.rgb.size(), s.pillow.size(), s.goal.size(), s.joint.size(), s.gripper.size())
 
-        for i in range(10): #change this to while not done
+        for while not done: #change this to while not done
             a = Q.sample_action(s,epsilon)
             s_prime, r, done, info = env.step(a)
             done_mask = 0.0 if done else 1.0
