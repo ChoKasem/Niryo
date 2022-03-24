@@ -132,10 +132,11 @@ class Niryo(Env):
         '''
         Compute the Reward, composing of 4 terms
         1) dist_penalty : penalize distance proportion to distance between goal and pillow
-        TODO: penalized for how off the orientation of pillow is to goal oritation
-        TODO: penalized for getting to deep into the bed (or don't touch bed at all, terminate if it does) or if hit bedframe
+        2) penalized for how off the orientation of pillow is to goal oritation
+        3) penalized for getting to deep into the bed (or don't touch bed at all, terminate if it does) or if hit bedframe
+        4) check for error in step, if can't find that path, should give negative reward
         TODO: ?maybe give high reward for placing pillow in correct pose and orientation witin threshold
-        : check for error in step, if can't find that path, should give negative reward
+        
         '''
         self.world.update_world_state()
         
