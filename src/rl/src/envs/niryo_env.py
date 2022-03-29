@@ -172,7 +172,20 @@ class Niryo(Env):
         touch_mattress_penalty = 0
         touch_bedframe_penalty = 0
         end_eff_pose = self.arm.get_end_effector_pose()
+
+        # Orientaion Penalty
+        goal = self.world.goal_pose
+        current = self.world.pillow_pose
+        pillow_rpy = tf.transformations.euler_from_quaternion([current.pose.orientation.x, current.pose.orientation.y, current.pose.orientation.z, current.pose.orientation.w])
+        goal_rpy = tf.transformations.euler_from_quaternion([goal.pose.orientation.x, goal.pose.orientation.y, goal.pose.orientation.z, goal.pose.orientation.w])
         
+        angle = pillow_rpy[2] - goal_rpy[2]
+        angle = (angle+180)%360 - 180
+        angle_threshold = 25
+        orientaion_penalty = 0
+        if abs(angle) > angle_threshold: # if the 
+            orientaion_penalty = -100
+
         # Penalty for touching the mattrss (by going lower than specify height)
         if end_eff_pose.position.z < 0.15: #0.159 if with bedframe, but shouldn't be much different and depend on bedframe model (just run arm.py to check end effector pose)
             touch_matress_penalty = -150
@@ -189,7 +202,7 @@ class Niryo(Env):
             print(self.planningstate.state_text)
             path_planning_penalty = -1000
         
-        total_reward = dist_reward() + touch_mattress_penalty + touch_bedframe_penalty + path_planning_penalty
+        total_reward = dist_reward() + touch_mattress_penalty + touch_bedframe_penalty + path_planning_penalty + orientaion_penalty
         print("Total Reward is: ", total_reward)
         return total_reward
 
